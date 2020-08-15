@@ -1,2 +1,2 @@
 import * as CUBE from './Main'
-module.exports = CUBE
+window.CUBE = CUBE
