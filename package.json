@@ -1,0 +1,53 @@
+{
+  "name": "cube.gl",
+  "version": "1.0.1",
+  "description": "CUBE.gl core. A WebGL-powered geographic data visualization framework built upon three.js.",
+  "main": "build/cube_npm.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development webpack --config webpack.config.js --mode=development -w",
+    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js --mode=production"
+  },
+  "peerDependencies": {
+    "three": "^0.117.1"
+  },
+  "dependencies": {
+    "@tweenjs/tween.js": "^18.6.0",
+    "deepmerge": "^4.2.2",
+    "geolib": "^3.3.1",
+    "leaflet": "^1.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isjeffcom/CUBE.gl.git"
+  },
+  "keywords": [
+    "data visualization",
+    "gis",
+    "3d",
+    "webgl",
+    "visualization",
+    "geographic",
+    "gis",
+    "layer",
+    "three"
+  ],
+  "author": "jeffwu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/isjeffcom/CUBE.gl/issues"
+  },
+  "homepage": "https://github.com/isjeffcom/CUBE.gl#readme",
+  "devDependencies": {
+    "@babel/core": "^7.11.1",
+    "@babel/preset-env": "^7.11.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.1.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.7.0",
+    "cross-env": "^7.0.2",
+    "three": "^0.117.1",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  }
+}
