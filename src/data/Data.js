@@ -48,7 +48,7 @@ export default class Data {
         let bar = new THREE.Mesh( geometry, material )
         
         
-        //Rotate around X 90deg 绕X轴旋转90度
+        //Rotate around X 90deg
         bar.rotateOnAxis(axisX, THREE.Math.degToRad(90))
 
         let y = local_coor.world.y + yOffset

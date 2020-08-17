@@ -29,7 +29,7 @@ export class Animation {
 
     GPSPath(paths, duration){
 
-        this.type == "tween"
+        this.type = "tween"
 
         let altitude = this.object.position.y
 

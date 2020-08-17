@@ -162,7 +162,7 @@ export class Space {
         // 支持由组名搜索，如果组不存在则加到scene根层级中
 
         if(typeof group == "string"){
-            group = this.FindLayer(group)
+            group = this.Find(group)
             group = group ? group : this.scene
         }
 
@@ -223,7 +223,7 @@ export class Space {
     */
 
     // Find a group 找到组
-    FindLayer(name){
+    Find(name){
 
         let res = null
         let groups = this.scene.children
