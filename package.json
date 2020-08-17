@@ -1,11 +1,11 @@
 {
   "name": "cube.gl",
-  "version": "1.0.1",
-  "description": "CUBE.gl core. A WebGL-powered geographic data visualization framework built upon three.js.",
-  "main": "index.js",
+  "version": "1.0.3",
+  "description": "CUBE.gl core. A WebGL-powered geographic data visualization framework build upon three.js.",
+  "main": "dist/cube.js",
   "scripts": {
     "dev": "parcel ./src/index.js",
-    "build": "parcel build ./src/index.js"
+    "build": "parcel build ./src/index.js -o cube.js"
   },
   "dependencies": {
     "@tweenjs/tween.js": "^18.6.0",
@@ -17,6 +17,10 @@
     "type": "git",
     "url": "git+https://github.com/isjeffcom/CUBE.gl.git"
   },
+  "files": [
+    "dist/cube.js",
+    "dist/cube.js.map"
+  ],
   "keywords": [
     "CUBE.gl",
     "CUBE",
