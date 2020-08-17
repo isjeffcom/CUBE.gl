@@ -16,7 +16,6 @@ export function GenBuilding(coordinates, height){
     })
 
     // var geometry = new THREE.ShapeBufferGeometry( shape )
-    // console.log(geometry)
 
     return geometry
 }
@@ -120,7 +119,6 @@ export function MergeLineGeometry(geometries){
     for(let i=0;i<geometries.length;i++){
         arr.push(geometries[i].attributes.position.array)
     }
-    //console.log(geometries[0].attributes.position.array)
     let geometry = new THREE.BufferGeometry()
     //geometry.attributes.position.array = arr
     

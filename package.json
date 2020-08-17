@@ -2,25 +2,25 @@
   "name": "cube.gl",
   "version": "1.0.1",
   "description": "CUBE.gl core. A WebGL-powered geographic data visualization framework built upon three.js.",
-  "main": "build/cube_npm.js",
+  "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development webpack --config webpack.config.js --mode=development -w",
-    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js --mode=production"
-  },
-  "peerDependencies": {
-    "three": "^0.117.1"
+    "dev": "parcel ./src/index.js",
+    "build": "parcel build ./src/index.js"
   },
   "dependencies": {
     "@tweenjs/tween.js": "^18.6.0",
     "deepmerge": "^4.2.2",
     "geolib": "^3.3.1",
-    "leaflet": "^1.6.0"
+    "three": "^0.119.1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/isjeffcom/CUBE.gl.git"
   },
   "keywords": [
+    "CUBE.gl",
+    "CUBE",
+    "cube",
     "data visualization",
     "gis",
     "3d",
@@ -38,9 +38,15 @@
   },
   "homepage": "https://github.com/isjeffcom/CUBE.gl#readme",
   "devDependencies": {
+    "@babel/core": "^7.11.1",
+    "@babel/preset-react": "^7.10.4",
     "cross-env": "^7.0.2",
-    "three": "^0.117.1",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
-  }
+    "parcel-bundler": "^1.12.4"
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "not IE_Mob 11",
+    "maintained node versions"
+  ]
 }

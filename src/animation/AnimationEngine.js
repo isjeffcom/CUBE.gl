@@ -7,6 +7,7 @@ export class AnimationEngine{
         this.ins = ins
         this.allTween = []
         this.allCircular = []
+        this.allDash=[]
         this.aniGroup = new Layer("_animation")
     }
 
@@ -18,6 +19,11 @@ export class AnimationEngine{
 
         if(animation.type === "circular"){
             this.allCircular.push(animation)
+            this.aniGroup.Add(animation.object)
+        }
+
+        if(animation.type === "dashline"){
+            this.allDash.push({object: animation.object, distance: animation.distance, speedStep: animation.speedStep})
             this.aniGroup.Add(animation.object)
         }
 
@@ -41,19 +47,42 @@ export class AnimationEngine{
 
                 // if(ani.state != 1) return
 
-                ani.angle += 0.005
+                if(ani){
+                    ani.angle += 0.005
     
-                let x = 3 * Math.sin(ani.angle)
-    
-                let z = 3 * Math.cos(ani.angle)
-    
-                ani.object.position.set(x, 5, z)
+                    let x = 3 * Math.sin(ani.angle)
+        
+                    let z = 3 * Math.cos(ani.angle)
+        
+                    ani.object.position.set(x, 5, z)
+                }
+                
             })
         }
 
         if(this.allTween.length > 0){
     
             TWEEN.update()
+        }
+
+        if(this.allDash.length > 0){
+    
+            for(let i=0;i<this.allDash.length;i++){
+                let line = this.allDash[i]
+
+                let dash = parseInt(line.object.material.dashSize)
+                let length = parseInt(line.distance)
+
+                if (dash > length) {
+                //console.log("b")
+                line.object.material.dashSize = 0
+                line.object.material.opacity = 1
+                } else {
+                    //console.log("a")
+                    line.object.material.dashSize += line.speedStep
+                    line.object.material.opacity = line.object.material.opacity > 0 ? line.object.material.opacity - 0.002 : 0
+                }
+            }
         }
 
     }

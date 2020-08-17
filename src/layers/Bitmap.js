@@ -54,7 +54,6 @@ export class BitmapLayer {
         // let offsetGPS = c.ReverseTileToGPS(zoom)
         // let offsetWorld = new Coordinate("GPS", offsetGPS).ComputeWorldCoordinate()
         // let offsetCenter = {x: (offsetWorld.world.x * options.size)  - (size/2), z: (offsetWorld.world.z * options.size) - (size/2)}
-        // console.log(offsetCenter)
 
         // Get 9 mataix tiles
         let textures = []
@@ -97,7 +96,6 @@ export class BitmapLayer {
             map.add(ground)
         }
 
-        //console.log(offsetWorld.world.x, 0 , offsetWorld.world.z)
         map.position.set(c.tile.centerOffset.x * 4.1, 0, c.tile.centerOffset.y * 5.65)
 
         this.layer.add(map)

@@ -3,13 +3,18 @@ import { Coordinate } from '../coordinate/Coordinate'
 import {GenShape, GenGeometry, GenHelper, MergeGeometry, GenWaterGeometry } from '../utils/ModelBuilder'
 import { Water } from 'three/examples/jsm/objects/Water'
 
+// import { Line2 } from 'three/examples/jsm/lines/Line2.js'
+// import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
+// import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
+
 import CUBE_Material from '../materials/CUBE_Material'
+import { Animation } from '../animation/Animation'
 import { Layer } from './Layer'
 
 
 export class GeoJsonLayer{
 
-    constructor(geojson, name){
+    constructor(name, geojson){
         this.geojson = geojson["features"]
         this.name = name
 
@@ -29,7 +34,7 @@ export class GeoJsonLayer{
     }
 
     /**
-     * @param {Object} options {merge: Boolean, border: Boolean} merge: if use merge function to optimise performance, border: if generate border
+     * @param {Object} options {merge: Boolean, border: Boolean, collider: Boolean, height: Number} merge: if use merge function to optimise performance, border: if generate border, collider: if load invisible collider when merge is true, no function if choose not merge, height: height value
      * @param {THREE.Material} mat_line replace line material
      * @param {THREE.Material} mat_map replace map main material
      * @public
@@ -77,12 +82,12 @@ export class GeoJsonLayer{
                 for(let i=0;i<coors.length;i++){
 
                     let coor = coors[i]
-                    let province = addProvince(coor, info, height)
+                    let province = addProvince(coor, info, options.collider, height)
                     
                     if(province){
                         if(options.merge){
                             geometries.push(province.geometry)
-                            this.layer_colliders.Add(province.helper)
+                            if(options.collider) this.layer_colliders.Add(province.helper)
                         } else {
                             this.layer_objects.Add(new THREE.Mesh(province.geometry, this.mat_map))
                         }
@@ -103,14 +108,14 @@ export class GeoJsonLayer{
         }
         
         this.layer.Add(this.layer_objects.Layer())
-        //this.layer.Add(this.layer_colliders.Layer())
+        if(options.collider) this.layer.Add(this.layer_colliders.Layer())
         this.layer.Add(this.layer_borders.Layer())
 
         return this.layer.Layer()
     }
 
     /**
-     * @param {Object} options {merge: Boolean, color: 0xffffff, terrain} merge: if use merge function to optimise performance
+     * @param {Object} options {merge: Boolean, color: 0xffffff, collider: Boolean, terrain: CUBE.Terrain()} merge: if use merge function to optimise performance, color: color, collider: if load invisible collider when merge is true, terrain: CUBE.Terrain() object
      * @param {THREE.Material} mat replace building material
      * @public
     */
@@ -129,12 +134,6 @@ export class GeoJsonLayer{
         let features = this.geojson
 
         let geometries = []
-        
-        // Max building number
-        // let count = features.length
-        // if(features.length > 1000){
-        //     //count = 1000
-        // }
 
         // Render all building
         for(let i=0;i<features.length;i++){
@@ -150,12 +149,12 @@ export class GeoJsonLayer{
             // Only render when geometry is Polygon
             if(tags && fel.geometry.type == "Polygon"){
 
-                let building = addBuilding(fel.geometry.coordinates, info["tags"]["building:levels"], terrain)
+                let building = addBuilding(fel.geometry.coordinates, options.collider, info, info["tags"]["building:levels"], terrain)
 
                 if(building){
                     if(options.merge){
                         geometries.push(building.geometry)
-                        //this.layer_colliders.Add(building.helper) // Invisiable collider
+                        if(options.collider) this.layer_colliders.Add(building.helper) // Invisiable collider
                     } else {
                         this.layer_objects.Add(new THREE.Mesh(building.geometry, this.mat_building))
                     }
@@ -171,33 +170,35 @@ export class GeoJsonLayer{
         }
 
         this.layer.Add(this.layer_objects.Layer())
-        //this.layer.Add(this.layer_colliders) // Invisiable collider
+        if(options.merged && options.collider) this.layer.Add(this.layer_colliders.Layer()) // Invisiable collider
         return this.layer.Layer()
     }
 
+    
+
     /**
-     * @param {Object} options {color: 0xffffff} merge: if use merge function to optimise performance
+     * Line merged, high preformance
+     * @param {Object} options {color: 0xffffff} 
      * @param {THREE.Material} mat replace building material
      * @public
     */
 
     Road(options={}, mat){
 
-        //let geometries = []
-
         let features = this.geojson
-        this.mat_road = new CUBE_Material().GeoRoad({ color: options.color ? options.color : 0x1B4686 })
+
+        this.mat_road = new CUBE_Material().GeoRoad({color: options.color ? options.color : 0x1B4686})
+
+        // Terrain
+        let terrain = options.terrain ? options.terrain.children[0].geometry : false
+
+        let allPoints = []
         
         // Replace material interface
         this.mat_road = mat ? mat : this.mat_road
 
         // Register material
         this.materials.push(this.mat_road)
-
-        // If merge, set material renderresolution
-        if(options.fat) this.mat_road.resolution.set( window.innerWidth, window.innerHeight )
-
-        //this.mat_road.resolution.set( window.innerWidth, window.innerHeight )
 
         for(let i=0;i<features.length;i++){
             let fel = features[i]
@@ -206,19 +207,84 @@ export class GeoJsonLayer{
             if(!fel["properties"]) return
 
             let info = fel["properties"]
-            //let selectTags = info.tags ? "tags" : "properties"
+
             // Only render when geometry is Polygon
             let tags = verify(info, "highway")
             
             if(tags){
                 // Render Roads
                 if(fel.geometry.type == "LineString" && tags != "pedestrian" && tags != "footway" && tags != "path"){
-                    let road = addRoad(fel.geometry.coordinates)
+                    let road = addRoad3(fel.geometry.coordinates, terrain)
                     if(road){
+                        allPoints = allPoints.concat(road)
+                    }
+                }
+            }
+        }
+        let geometry = new THREE.Geometry()
+        for(let g=0;g<allPoints.length;g++){
+            geometry.vertices.push(allPoints[g])
+        }
 
+        geometry.rotateZ(Math.PI)
+        let line = new THREE.LineSegments( geometry, this.mat_road )
+
+        // Adjust position
+        line.position.set(line.position.x, 1, line.position.z)
+
+        // Disable matrix auto update for performance
+        line.matrixAutoUpdate = false
+        line.updateMatrix()
+        this.layer_objects.Add(line)
+
+        this.layer.Add(this.layer_objects.Layer())
+
+        return this.layer.Layer()
+    }
+
+
+    /**
+     * Line un-merged poor preformance
+     * @param {Object} options {color: 0xffffff, animation: CUBE.Animation, instance: CUBE.Space} merge: if use merge function to optimise performance
+     * @param {THREE.Material} mat replacement material
+     * @public
+    */
+
+   RoadSp(options={}, mat){
+
+        let features = this.geojson
+        this.mat_road = new CUBE_Material().GeoRoad()
+
+        // Terrain
+        let terrain = options.terrain ? options.terrain.children[0].geometry : false
+
+        // Replace material interface
+        this.mat_road = mat ? mat : this.mat_road
+
+        // Register material
+        this.materials.push(this.mat_road)
+
+        for(let i=0;i<features.length;i++){
+            let fel = features[i]
+
+            // Just in case properties value does not exist
+            if(!fel["properties"]) return
+
+            let info = fel["properties"]
+            // Only render when geometry is Polygon
+            let tags = verify(info, "highway")
+            
+            if(tags){
+                // Render Roads
+                if(fel.geometry.type == "LineString" && tags != "pedestrian" && tags != "footway" && tags != "path"){
+                    
+                    let road = addRoad(fel.geometry.coordinates, terrain)
+
+                    if(road){
+                        // Add line
                         let line = new THREE.Line( road.geometry, this.mat_road )
                         line.info = info
-                        line.computeLineDistances()
+                        
 
                         // Adjust position
                         line.position.set(line.position.x, 1, line.position.z)
@@ -226,26 +292,36 @@ export class GeoJsonLayer{
                         // Disable matrix auto update for performance
                         line.matrixAutoUpdate = false
                         line.updateMatrix()
+
+
+                        // If Animation Activated
+                        if(options.animation && options.animationEngine){
+                            line.computeLineDistances()
+                            let lineLength = line.geometry.attributes.lineDistance.array[ line.geometry.attributes.lineDistance.count - 1]
+                            if(lineLength > 0.8){
+                                let aniLine = addAnimatedLine(line.geometry, lineLength)
+                                let lineAni = new Animation("l", aniLine, "dashline").DashLine(lineLength)
+                                options.animationEngine.Register(lineAni)
+                            }
+                            
+                        }
+
                         this.layer_objects.Add(line)
-                        
                     }
                 }
             }
         }
 
-        // Merge geometry for performance NOT SUPPORTED
-        // if(options.merge){
-        //     let mergedGeometry = MergeLineGeometry(geometries)
-        //     let roadMesh = new THREE.LineSegments(mergedGeometry, this.mat_road)
-        //     roadMesh.position.set(roadMesh.position.x, 1.1, roadMesh.position.z)
-        //     this.layer.Add(roadMesh)
-        //     //console.log(geometries[0])
-        // }
-
         this.layer.Add(this.layer_objects.Layer())
 
         return this.layer.Layer()
     }
+
+    /**
+     * Water
+     * @param {Object} options {color: 0xffffff} merge: if use merge function to optimise performance
+     * @public
+    */
 
     Water(options={}){
 
@@ -284,13 +360,82 @@ export class GeoJsonLayer{
         
     }
 
-    GetMaterials(){
-        return this.materials
+    /**
+     * Custom Polygon
+     * @param {Object} options {color: 0xffffff, height: Number, merge: Boolean} color: color merge: if use merge function to optimise performance
+     * @param {THREE.Material} mat replacement material
+     * @public
+    */
+
+    Polygon(options={}, mat){
+        // Replace material?
+        this.mat = mat ? mat : new CUBE_Material().GeoMap({color: options.color ? options.color : 0x2E3342})
+
+        // Register material
+        this.materials.push(this.mat)
+
+        let features = this.geojson
+
+        let height = options.height ? options.height : 1
+
+        let geometries = []
+
+        // Render all buildings
+        for(let i=0;i<features.length;i++){
+
+            let fel = features[i]
+
+            // Just in case properties value does not exist
+            if(!fel["properties"]) return
+
+            let info = fel["properties"]
+            
+            // Only render when geometry is Polygon
+            // Render building
+            if(fel.geometry.coordinates){
+
+                let coors = []
+
+                if(fel.geometry.type == "Polygon"){
+                    coors.push(fel.geometry.coordinates)
+                }
+                
+                for(let i=0;i<coors.length;i++){
+
+                    let coor = coors[i]
+                    let poly = addBuilding(coor, false, info, height)
+                    
+                    if(poly){
+                        if(options.merge){
+                            geometries.push(poly.geometry)
+                        } else {
+                            this.layer_objects.Add(new THREE.Mesh(poly.geometry, this.mat))
+                        }
+
+                    } 
+
+                }
+
+            }
+        }
+        
+        // Merge geometry for performance
+        if(options.merge){
+            let mergedGeometry = MergeGeometry(geometries)
+            let provinceMesh = new THREE.Mesh(mergedGeometry, this.mat)
+            this.layer_objects.Add(provinceMesh)
+        }
+        
+        this.layer.Add(this.layer_objects.Layer())
+        //this.layer.Add(this.layer_colliders.Layer())
+        this.layer.Add(this.layer_borders.Layer())
+
+        return this.layer.Layer()
     }
 
 }
 
-function addBuilding(coordinates, height=1, terrain) {
+function addBuilding(coordinates, collider=false, info={}, height=1, terrain) {
     height = height ? height : 1
 
     let shape, geometry
@@ -325,22 +470,26 @@ function addBuilding(coordinates, height=1, terrain) {
         if(dem) {geometry.translate(0, dem.y, 0)}
     }
     
-    // DISABLE HERE TO GENERATE INVISIABLE COLLIDER
-    //let helper = GenHelper(geometry)
-    // if(helper){
-    //     helper.name = info["name"] ? info["name"] : "Building"
-    //     helper.info = info
-    // }
+    // Generate invisible helper if needed
+    let helper = {}
+    if(collider){
+        helper = GenHelper(geometry)
+        if(helper){
+            helper.name = info["name"] ? info["name"] : "Building"
+            helper.info = info
+        }
+    }
+    
 
     return {
         geometry: geometry, 
-        //helper: helper
+        helper: helper
     }
   
   
   }
 
-function addProvince(coordinates, info, height=1){
+function addProvince(coordinates, info, collider=false, height=1){
     let shape, geometry
     // Loop for all nodes
     for(let i=0;i<coordinates.length;i++){
@@ -367,15 +516,16 @@ function addProvince(coordinates, info, height=1){
         geometry.rotateX(Math.PI / 2)
         geometry.rotateZ(Math.PI)
 
-        let helper = GenHelper(geometry)
-        if(helper){
-            helper.name = info["name"] ? info["name"] : "Building"
-            helper.info = info
+        // Generate invisible helper if needed
+        let helper = {}
+        if(collider){
+            helper = GenHelper(geometry)
+            if(helper){
+                helper.name = info["name"] ? info["name"] : "Building"
+                helper.info = info
+            }
         }
-
-        // let mesh = new THREE.Mesh(geometry, material)
-        // //mesh.position.y = 0
-        // mesh.info = info
+        
 
         return {geometry: geometry, helper: helper}
     }
@@ -383,7 +533,7 @@ function addProvince(coordinates, info, height=1){
     
 }
 
-function addRoad(d){
+function addRoad(d, terrain){
 
     // Init points array
     let points = []
@@ -402,26 +552,26 @@ function addRoad(d){
 
         //convert position from the center position
         elp = new Coordinate("GPS", {latitude: elp[1], longitude: elp[0]}).ComputeWorldCoordinate()
-        //elp = ThreeBasic.GPSRelativePosition({latitude: elp[1], longitude: elp[0]}, this.Center)
 
         // WAIT FOR MERGE adjust height according to terrain data
         // Rotate
-        var vector = new THREE.Vector3( elp.world.x, elp.world.y, elp.world.z )
-        var axis = new THREE.Vector3( 0, 0, 1 )
-        var angle = Math.PI
+        let vector = new THREE.Vector3( elp.world.x, elp.world.y, elp.world.z )
+        let axis = new THREE.Vector3( 0, 0, 1 )
+        let angle = Math.PI
 
         vector.applyAxisAngle( axis, angle )
         
-        // // Fit Terrain
-        // let dem = this.ShortEst({x: vector.x, z: vector.z}, this.terrainData.vertices)
-        
-        // //console.log(dem.y)
-        // let y
-        // if(dem) {y = -dem.y} else {y = 0.5}
+        let y = 0
+
+        if(terrain){
+            let dem = shortEst({x: vector.x, z: vector.z}, terrain.vertices)
+            if(dem) {
+                y = -dem.y
+            }
+        }
         
         // Draw Line
-        points.push( new THREE.Vector3( elp.world.x, elp.world.y + 1, elp.world.z ) )
-        
+        points.push( new THREE.Vector3( elp.world.x, elp.world.y + y, elp.world.z ) )
         
     }
     let geometry
@@ -430,23 +580,55 @@ function addRoad(d){
     // Adjust geometry rotation
     geometry.rotateZ(Math.PI)
 
-    // if(this.FLAG_ROAD_ANI){
-    //   let lineLength = geometry.attributes.lineDistance.array[ geometry.attributes.lineDistance.count - 1]
-    //   if(lineLength > 0.8){
-    //     let aniLine = this.addAnimatedLine(geometry, lineLength)
-    //     //this.Animated_Lines.push(aniLine)
-    //     this.iR_Line.add(aniLine)
-    //   }
-    // }
-
-    // Calculate Real Position
-    //let realPosi = ThreeBasic.GPSRelativePosition({lat: d[parseInt(d.length / 2)][1], lon: d[parseInt(d.length / 2)][0]}, this.Center)
-    //line.realPosi = new THREE.Vector3(realPosi[0], line.position.y, realPosi[1])
-
-
-    
-
     return {geometry: geometry}
+}
+
+
+
+function addRoad3(d, terrain){
+
+    //let state = false
+
+    let points = []
+
+    // Loop for all nodes
+    for(let i=0;i<d.length;i++){
+        
+        if(!d[0][1]) return
+        
+        let el = d[i]
+
+        //Just in case
+        if(!el[0] || !el[1]) return
+        
+        let elp = [el[0], el[1]]
+
+        //convert position from the center position
+        elp = new Coordinate("GPS", {latitude: elp[1], longitude: elp[0]}).ComputeWorldCoordinate()
+
+        // WAIT FOR MERGE adjust height according to terrain data
+        // Rotate
+        let vector = new THREE.Vector3( elp.world.x, elp.world.y, elp.world.z )
+        let axis = new THREE.Vector3( 0, 0, 1 )
+        let angle = Math.PI
+
+        vector.applyAxisAngle( axis, angle )
+
+        let y = 0
+
+        if(terrain){
+            let dem = shortEst({x: vector.x, z: vector.z}, terrain.vertices)
+            if(dem) {
+                y = -dem.y
+            }
+        }
+        
+        // Draw Line in Pair [1,1], [1,2], [1,2], [2,5], [2,5], [3,6]
+        points.push( new THREE.Vector3( elp.world.x, elp.world.y + y, elp.world.z ) )
+        if(i!=0 && i!=d.length-1) points.push( new THREE.Vector3( elp.world.x, elp.world.y + y, elp.world.z ) )
+    }
+
+    return points
 }
 
 function addBorder(coordinates, material, up){
@@ -540,3 +722,122 @@ function verify(properties, key="building"){
 
     return tags
 }
+
+function addAnimatedLine(geometry, length, color = 0x00FFFF){
+    let animatedLine = new THREE.Line(geometry, new THREE.LineDashedMaterial({ color: color }))
+    animatedLine.material.transparent = true
+    animatedLine.material.dashSize = 0
+    animatedLine.material.gapSize = length + 10
+
+    return animatedLine
+
+}
+
+
+/**
+ * Fat Line (reserved)
+ * @param {Object} options {color: 0xffffff} merge: if use merge function to optimise performance
+ * @param {THREE.Material} mat replace building material
+ * @public
+*/
+
+// INSIDE CLASSES   Road2(options={}, mat){
+//     let features = this.geojson
+    
+//     this.mat_road = new LineMaterial({
+
+//         color: 0xffffff,
+//         linewidth: 5, // in pixels
+//         vertexColors: false,
+//         //resolution:  // to be set by renderer, eventually
+//         dashed: false
+
+//     })
+
+//     this.mat_road.resolution.set( window.innerWidth, window.innerHeight );
+
+//     // Register material
+//     this.materials.push(this.mat_road)
+
+//     for(let i=0;i<features.length;i++){
+//         let fel = features[i]
+
+//         // Just in case properties value does not exist
+//         if(!fel["properties"]) return
+
+//         let info = fel["properties"]
+//         //let selectTags = info.tags ? "tags" : "properties"
+//         // Only render when geometry is Polygon
+//         let tags = verify(info, "highway")
+        
+//         if(tags){
+//             // Render Roads
+//             if(fel.geometry.type == "LineString" && tags != "pedestrian" && tags != "footway" && tags != "path"){
+//                 let road = addRoad2(fel.geometry.coordinates)
+//                 if(road){
+//                     let line = new Line2( road.geometry, this.mat_road )
+//                     line.computeLineDistances()
+//                     line.info = info
+
+//                     //Adjust position
+//                     line.position.set(line.position.x, 1, line.position.z)
+
+//                     this.layer_objects.Add(line)
+//                 }
+//             }
+//         }
+//     }
+    
+
+//     this.layer.Add(this.layer_objects.Layer())
+
+//     return this.layer.Layer()
+// }
+
+
+// function addRoad2(d){
+
+//     // Init points array
+//     let points = []
+
+//     // Loop for all nodes
+//     for(let i=0;i<d.length;i++){
+        
+//         if(!d[0][1]) return
+        
+//         let el = d[i]
+
+//         //Just in case
+//         if(!el[0] || !el[1]) return
+        
+//         let elp = [el[0], el[1]]
+
+//         //convert position from the center position
+//         elp = new Coordinate("GPS", {latitude: elp[1], longitude: elp[0]}).ComputeWorldCoordinate()
+//         //elp = ThreeBasic.GPSRelativePosition({latitude: elp[1], longitude: elp[0]}, this.Center)
+
+//         // WAIT FOR MERGE adjust height according to terrain data
+//         // Rotate
+//         let vector = new THREE.Vector3( elp.world.x, elp.world.y, elp.world.z )
+//         let axis = new THREE.Vector3( 0, 0, 1 )
+//         let angle = Math.PI
+
+//         vector.applyAxisAngle( axis, angle )
+        
+//         // // Fit Terrain
+//         // let dem = this.ShortEst({x: vector.x, z: vector.z}, this.terrainData.vertices)
+        
+//         // //console.log(dem.y)
+//         // let y
+//         // if(dem) {y = -dem.y} else {y = 0.5}
+        
+//         // Draw Line
+//         points.push( elp.world.x, elp.world.y + 1, elp.world.z  )
+        
+//     }
+//     // let geometry
+//     let geometry = new LineGeometry().setPositions(points)
+//     geometry.rotateZ(Math.PI)
+
+//     return {geometry: geometry}
+// }

@@ -19,6 +19,7 @@ export { Polygon } from './layers/Polygon'
 
 
 // Layers
+export { Layer } from './layers/Layer'
 export { GeoJsonLayer } from './layers/GeoJson'
 export { BitmapLayer } from './layers/Bitmap'
 

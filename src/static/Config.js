@@ -99,6 +99,6 @@ export function DefaultConfig(){
         "near": 50,
         "far": 150
     },
-    "debug": true
+    "debug": false
   }
 }

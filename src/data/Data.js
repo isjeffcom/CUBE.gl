@@ -2,6 +2,8 @@
 import * as THREE from 'three'
 import { getCenter } from 'geolib'
 import { Coordinate } from '../coordinate/Coordinate'
+import CUBE_Material from '../materials/CUBE_Material'
+
 
 let axisX = new THREE.Vector3(1,0,0)
 //let axisY = new THREE.Vector3(0,1,0)
@@ -28,6 +30,7 @@ export default class Data {
 
         let y = local_coor.world.y + yOffset
         sphere.position.set(-local_coor.world.x, y, local_coor.world.z)
+        sphere.name = this.name
         return sphere
     }
 
@@ -52,6 +55,8 @@ export default class Data {
         bar.position.set(-local_coor.world.x, y + ((height/2)), local_coor.world.z)
         //bar.rotateY(Math.PI / 2)
 
+        bar.name = this.name
+
         return bar
     }
 
@@ -72,6 +77,8 @@ export default class Data {
         //cylinder.rotateOnAxis(axisX, THREE.Math.degToRad(90))
         let y = local_coor.world.y + yOffset
         cylinder.position.set(-local_coor.world.x, y + ((height/2)), local_coor.world.z)
+
+        cylinder.name = this.name
 
         return cylinder
     }
@@ -95,12 +102,36 @@ export default class Data {
 
         let material = mat ? mat : new THREE.LineBasicMaterial( { color : color, linewidth: 1 } )
         let arc = new THREE.Line( geometry, material )
-
+        arc.name = this.name
 
         //Rotate around X 90deg 绕X轴旋转90度
         //arc.rotateOnAxis(axisY, THREE.Math.degToRad(90))
 
         return arc
+    }
+
+    Text(coordinate, text, size=30, color, thickness=.1, align="left", fontface, mat){
+        const font = new CUBE_Material().TextFont(fontface ? fontface : undefined)
+        
+        let local_coor = new Coordinate("GPS", coordinate).ComputeWorldCoordinate()
+
+        let geometry = new THREE.TextBufferGeometry( text, {
+            font: font,
+            size: size,
+            height: thickness,
+            curveSegments: parseInt(size/6)
+        })
+
+        geometry.center()
+        
+        const textColor = color ? color : 0xff0000
+        let mesh = new THREE.Mesh(geometry, mat ? mat : new CUBE_Material().Text({color: textColor}))
+        
+        mesh.position.set(-local_coor.world.x, local_coor.world.yy, local_coor.world.z)
+        mesh.name = this.name
+        
+        return mesh
+        
     }
 
 }

@@ -6,6 +6,11 @@ export class Layer {
         this.layer.name = name
     }
 
+    /**
+     * Return Layer
+     * @public
+    */
+
     Layer(){
         return this.layer
     }
@@ -27,7 +32,8 @@ export class Layer {
      * @public
     */
 
-    Remove(object3D){
+    Delete(object3D){
+        if(!object3D) return this.layer
         if(object3D["geometry"]) object3D["geometry"].dispose()
         if(object3D["material"]) object3D["material"].dispose()
         this.layer.remove(object3D)
@@ -40,7 +46,9 @@ export class Layer {
     */
 
     Clear(){
-        console.log(this.layer)
+
+        if(this.layer.children.length < 1) return this.layer
+
         for(let i=0;i<this.layer.children.length;i++){
             let obj = this.layer.children[i]
             if(obj["geometry"]) obj["geometry"].dispose()

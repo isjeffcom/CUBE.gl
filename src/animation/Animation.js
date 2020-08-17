@@ -22,6 +22,7 @@ export class Animation {
 
         // Tween object
         this.tween = null
+        this.distance = null
 
         this.options = deepmerge(opt, options)
     }
@@ -54,14 +55,21 @@ export class Animation {
         return this
     }
 
-    Destroy(){
-        if(this.tween) this.tween.stop()
+    DashLine(distance){
+        this.distance = distance
+        this.speedStep = distance / 400
+        return this
     }
 
+    
     Circular(){
         this.type = "circular"
         if(this.options.startNow) this.Play()
         if(this.options.repeat) this.Loop()
+    }
+
+    Destroy(){
+        if(this.tween) this.tween.stop()
     }
 
     Play(){

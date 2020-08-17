@@ -16,10 +16,12 @@ export class ShaderEngine{
 
     Update(){
         this.allShaders.forEach(shader => {
-            if(shader.node.value < shader.range.max){
-                shader.node.value += shader.range.step
-            }else{
-                shader.node.value = shader.range.min
+            if(shader){
+                if(shader.node.value < shader.range.max){
+                    shader.node.value += shader.range.step
+                }else{
+                    shader.node.value = shader.range.min
+                }
             }
         })
 

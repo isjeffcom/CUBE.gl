@@ -27,10 +27,15 @@ export class Space {
         // Update Global Config
         window.CUBE_GLOBAL.CENTER = opt.center ? Clone(opt.center) : window.CUBE_GLOBAL.CENTER
         window.CUBE_GLOBAL.MAP_SCALE = opt.scale ? opt.scale : window.CUBE_GLOBAL.MAP_SCALE
+        
+        this.scale = window.CUBE_GLOBAL.MAP_SCALE
+
+        this.three = THREE
 
         // Merge or overwrite options 
         let DefaultOptions = DefaultConfig()
         let options = opt ? merge(DefaultOptions, opt) : DefaultOptions
+        this.options = options
 
         // Map Center 
         this.center = options.center
@@ -81,6 +86,10 @@ export class Space {
         // Init Controls Update
         this.controls.update()
 
+        // save all lookats object
+        this.hasLookAt = false
+        this.lookats = []
+
         //this.controls.addEventListener( 'change', this.Update() ); 
 
         // Debug Mode 
@@ -89,6 +98,25 @@ export class Space {
             this.stats = new Stats()
             container.appendChild( this.stats.dom )
         }
+
+        // Save Instance to global for internal access
+        //window.CUBE_GLOBAL.INS = this
+
+        // Auto resize
+        this.WindowResize()
+        
+        window.addEventListener( 'resize', ()=>{
+            this.WindowResize(window)
+        }, false )
+    }
+
+    Ray(event, layer){
+        let mouse = {}
+        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1
+        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1
+        this.raycaster.setFromCamera( mouse, this.camera )
+        let intersects = this.raycaster.intersectObjects( layer )
+        return intersects
     }
 
     /**
@@ -106,9 +134,16 @@ export class Space {
         if(this.AniEngine){
             if(this.isViewable()) this.AniEngine.Update()
         }
+
         if(this.ShaderEngine) this.ShaderEngine.Update()
+
+        if(this.hasLookAt){
+            this.lookats.forEach(LAObj => {
+                if(LAObj) LAObj.lookAt(this.camera.position)
+            })
+        }
         
-        this.stats.update()
+        if(this.options.debug) this.stats.update()
     }
 
     /**
@@ -144,6 +179,7 @@ export class Space {
     */
 
     Delete(object3D, group){
+        if(!object3D) return false
         if(!group) group = this.scene
         if(object3D["geometry"]) object3D["geometry"].dispose()
         if(object3D["material"]) object3D["material"].dispose()
@@ -202,24 +238,6 @@ export class Space {
     }
 
     /**
-     * Getter to return current geo center
-     * @public
-    */
-
-    GetCenter(){
-        return this.center
-    }
-
-    /**
-     * Getter to return current THREE.Scene
-     * @public
-    */
-
-    GetScene(){
-        return this.scene
-    }
-
-    /**
      * @class Getter to return current AnimationEngine
      * @public
     */
@@ -255,6 +273,37 @@ export class Space {
     SetShaderEngine(shaderEngine){
         if(this.ShaderEngine){ console.e("ShaderEngine has existed. You cannot add twice."); return }
         this.ShaderEngine = shaderEngine
+    }
+
+    /**
+     * Set an object always lookat camera
+     * @param {object3D} obj an array of type and THREE.Light objects. { "name": "front-left", "type": "Point", "color": "fafafa", "opacity": 0.4, "shadow": false,"position": {"x": 200, "y": 90, "z": 40}
+     * @public
+    */
+
+    SetLookAt(object){
+        this.lookats.push(object)
+        if(this.lookats.length > 0) this.hasLookAt = true
+    }
+
+    /**
+     * Remove an object always lookat camera
+     * @param {object3D} obj an array of type and THREE.Light objects. { "name": "front-left", "type": "Point", "color": "fafafa", "opacity": 0.4, "shadow": false,"position": {"x": 200, "y": 90, "z": 40}
+     * @public
+    */
+
+    RemoveLookAt(obj){
+        let ready = []
+        for(let i=0;i<this.lookats.length;i++){
+            let lookat = this.lookats[i]
+            if(lookat === obj){
+                ready.push(i)
+            }
+        }
+
+        for(let ii=0;ii<ready.length;ii++){
+            this.lookats.splice(ready[ii], 1)
+        }
     }
 
     /**
@@ -301,7 +350,7 @@ export class Space {
      * @public
     */
 
-    WindowResize(window){
+    WindowResize(){
         this.camera.aspect = window.innerWidth / window.innerHeight
         this.camera.updateProjectionMatrix()
         this.renderer.setSize( window.innerWidth, window.innerHeight )

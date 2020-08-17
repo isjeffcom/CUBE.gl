@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { Vector3 } from 'three'
+import {helvetiker} from './assets/font'
 
 export default class CUBE_Material{
     constructor(type){
@@ -12,6 +13,15 @@ export default class CUBE_Material{
 
     Point(property={ size: 4, color: 0xff0000, sizeAttenuation: false }){
         return new THREE.PointsMaterial( property )
+    }
+
+    Text(property={ color: 0xff0000 }){
+        return new THREE.MeshBasicMaterial(property)
+    }
+
+    TextFont(fontJson){
+        let font =  new THREE.FontLoader().parse(fontJson ? fontJson : helvetiker)
+        return font
     }
 
     Terrain(property={color: 0xfafafa, side: THREE.DoubleSide, wireframe: true}){
@@ -42,11 +52,11 @@ export default class CUBE_Material{
         return new THREE.LineDashedMaterial(property)
     }
 
-    GeoWater(sun, fog=true){
+    GeoWater(sun, normal, fog=true){
         let property = {
             textureWidth: .5,
             textureHeight: .5,
-            waterNormals: this.GeoWaterNormal(),
+            waterNormals: loadNormal(normal),
             alpha: 1.0,
             sunColor: 0xDDEBFF,
             waterColor: 0x78AFFF,
@@ -57,9 +67,13 @@ export default class CUBE_Material{
         return property
     }
 
-    GeoWaterNormal(normalTexture = './assets/waternormals.png'){
-        return new THREE.TextureLoader().load( normalTexture, function ( texture ) {
-            texture.wrapS = texture.wrapT = THREE.RepeatWrapping
-        })
-    }
+}
+
+function loadNormal(normalTexture){
+    if(!normalTexture) return
+
+    return new THREE.TextureLoader().load( normalTexture, function ( texture ) {
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping
+    })
+
 }
