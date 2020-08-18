@@ -101,11 +101,11 @@ Run your project, you will see a green cube placed in the middle of your screen 
 
 
 
-![example-1](./assets/use/example-1.png)
+![example-1](https://cubegl.org/assets/use/example-1.png)
 
 
 
-3. Now let's explore more. Add the following line **before Update()**
+1. Now let's explore more. Add the following line **before Update()**
 
 ```javascript
 // Add Geojson Map Layer
@@ -128,7 +128,7 @@ Run your project, you will see an administrative map of China display in the cen
 
 
 
-![example-2](./assets/use/example-2.png)
+![example-2](https://cubegl.org/assets/use/example-2.png)
 
 
 
