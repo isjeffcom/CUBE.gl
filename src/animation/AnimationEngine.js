@@ -18,7 +18,7 @@ export class AnimationEngine{
         }
 
         if(animation.type === "circular"){
-            this.allCircular.push(animation)
+            this.allCircular.push({object: animation.object, radius: animation.radius, height: animation.height, angle: animation.angle})
             this.aniGroup.Add(animation.object)
         }
 
@@ -50,11 +50,11 @@ export class AnimationEngine{
                 if(ani){
                     ani.angle += 0.005
     
-                    let x = 3 * Math.sin(ani.angle)
+                    let x = ani.radius * Math.sin(ani.angle)
         
-                    let z = 3 * Math.cos(ani.angle)
+                    let z = ani.radius * Math.cos(ani.angle)
         
-                    ani.object.position.set(x, 5, z)
+                    ani.object.position.set(x, ani.height, z)
                 }
                 
             })

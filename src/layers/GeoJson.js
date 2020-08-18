@@ -14,6 +14,12 @@ import { Layer } from './Layer'
 
 export class GeoJsonLayer{
 
+    /**
+     * @param {String} name name of the layer
+     * @param {Object} geojson geojson data json object 
+     * @public
+    */
+
     constructor(name, geojson){
         this.geojson = geojson["features"]
         this.name = name

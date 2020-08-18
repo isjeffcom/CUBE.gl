@@ -7,18 +7,24 @@ import { Layer } from "./Layer"
 
 export class Terrain{
 
+    /**
+     * @param {String} name name of the terrain object
+     * @public
+    */
+
     constructor(name){
-        // this.bbox = bbox ? bbox : window.CUBE_GLOBAL.bbox
-
-        // if(!this.bbox){
-        //     console.error("Boundary box parameter is essential and must pass in")
-        // }
-
         this.geometry = null
 
         // Main Layer
         this.layer = new Layer(name)
     }
+
+    /**
+     * @param {Number} sizeX width
+     * @param {Number} sizeY height
+     * @param {Number} segments quality
+     * @public
+    */
 
     Ground(sizeX=20, sizeY=20, segments=32){
         let geometry = new THREE.PlaneBufferGeometry( sizeX, sizeY, segments )
@@ -29,6 +35,13 @@ export class Terrain{
         this.layer.Add(ground)
         return this.layer.Layer()
     }
+
+    /**
+     * @param {Number} sizeX width
+     * @param {Number} sizeY height
+     * @param {Number} segments quality
+     * @public
+    */
 
     WaterGround(sizeX=20, sizeY=20, segments=32){
         let sun = new THREE.Light("#ffffff", .5)

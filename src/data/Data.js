@@ -12,6 +12,12 @@ let axisX = new THREE.Vector3(1,0,0)
 
 // pass in an a single data
 export default class Data {
+    
+    /**
+     * Create a sphere
+     * @param {String} name name of the data
+     * @public
+    */
 
     constructor(name){
         this.name = name
@@ -20,12 +26,23 @@ export default class Data {
         this._SEGMENTS = 16 * this._SCALE
     }
 
-    Sphere(coordinate, value=1, size=2, yOffset=0, color=0xff6600){
+    /**
+     * Create a sphere
+     * @param {Object} coordinate {latitude: Number, longitude: Number}
+     * @param {Number} value segments
+     * @param {Number} size size of the sphere
+     * @param {Number} yOffset set a default y value
+     * @param {THREE.Color} color 0xff6600
+     * @param {THREE.Material} mat replacement material
+     * @public
+    */
+
+    Sphere(coordinate, value=1, size=2, yOffset=0, color=0xff6600, mat){
 
         let local_coor = new Coordinate("GPS", coordinate).ComputeWorldCoordinate()
 
         let geometry = new THREE.SphereBufferGeometry( size*3, value*size, value*size )
-        let material = new THREE.MeshBasicMaterial( {color: color} )
+        let material = mat ? mat : new THREE.MeshBasicMaterial( {color: color} )
         let sphere = new THREE.Mesh( geometry, material )
 
         let y = local_coor.world.y + yOffset
@@ -33,6 +50,17 @@ export default class Data {
         sphere.name = this.name
         return sphere
     }
+
+    /**
+     * Create a bar
+     * @param {Object} coordinate {latitude: Number, longitude: Number}
+     * @param {Number} value segments
+     * @param {Number} size size of the sphere
+     * @param {Number} yOffset set a default y value
+     * @param {THREE.Color} color 0xff6600
+     * @param {THREE.Material} mat replacement material
+     * @public
+    */
 
     Bar(coordinate, value=1, size=.5, yOffset=0, color=0xff6600, mat){
 
@@ -60,6 +88,17 @@ export default class Data {
         return bar
     }
 
+    /**
+     * Create a bar
+     * @param {Object} coordinate {latitude: Number, longitude: Number}
+     * @param {Number} value segments
+     * @param {Number} size size of the sphere
+     * @param {Number} yOffset set a default y value
+     * @param {THREE.Color} color 0xff6600
+     * @param {THREE.Material} mat replacement material
+     * @public
+    */
+
     Cylinder(coordinate, value=1, size=.5, yOffset=0, color=0xff6600, mat){
 
         let height = this._HEIGHT_SCALE * value
@@ -82,6 +121,17 @@ export default class Data {
 
         return cylinder
     }
+
+    /**
+     * Create a bar
+     * @param {Object} coorA {latitude: Number, longitude: Number}
+     * @param {Object} coorB {latitude: Number, longitude: Number}
+     * @param {Number} height top point of the arc
+     * @param {Number} yOffset set a default y value
+     * @param {THREE.Color} color 0xff6600
+     * @param {THREE.Material} mat replacement material
+     * @public
+    */
 
     Arc(coorA, coorB, height=5, yOffset=0, color=0xff6600, mat){
         height = height * this._SCALE
@@ -109,6 +159,18 @@ export default class Data {
 
         return arc
     }
+
+    /**
+     * Create a bar
+     * @param {Object} coordinate {latitude: Number, longitude: Number}
+     * @param {String} text text content
+     * @param {Number} size font size
+     * @param {THREE.Color} color 0xff6600
+     * @param {Number} thickness thickness
+     * @param {Object} fontface json font json object
+     * @param {THREE.Material} mat replacement material
+     * @public
+    */
 
     Text(coordinate, text, size=30, color, thickness=.1, align="left", fontface, mat){
         const font = new CUBE_Material().TextFont(fontface ? fontface : undefined)

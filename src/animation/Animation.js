@@ -11,6 +11,14 @@ let opt = {
 
 export class Animation {
     // State 0: stop, 1: playing, 2: paused, 99: infinite
+
+    /**
+     * @param {String} name animation name
+     * @param {Object3D} object a 3D object
+     * @param {String} type animation type
+     * @param {Object} options config {startNow: Boolean, delay: Number, repeat: Boolean}
+     * @public
+    */
     constructor(name, object, type, options={}){
         this.name = name
         this.object = object
@@ -26,6 +34,12 @@ export class Animation {
 
         this.options = deepmerge(opt, options)
     }
+
+    /**
+     * @param {Array} paths an array of paths
+     * @param {Number} duration how long of this animation
+     * @public
+    */
 
     GPSPath(paths, duration){
 
@@ -55,17 +69,31 @@ export class Animation {
         return this
     }
 
+    /**
+     * @param {Number} distance how long the line is
+     * @public
+    */
+
     DashLine(distance){
+        this.type = "dashline"
         this.distance = distance
         this.speedStep = distance / 400
         return this
     }
 
+    /**
+     * @param {Number} radius rotating radius
+     * @param {Number} height rotating altitude
+     * @public
+    */
     
-    Circular(){
+    Circular(radius=5, height=5){
         this.type = "circular"
+        this.radius = radius
+        this.height = height
         if(this.options.startNow) this.Play()
         if(this.options.repeat) this.Loop()
+        return this
     }
 
     Destroy(){

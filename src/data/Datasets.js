@@ -16,6 +16,15 @@ data: [
 
 // Pass in an array of data
 export class Datasets extends Data{
+
+    /**
+     * Datasets constructor
+     * @param {String} name name of the datasets
+     * @param {Array} data an array of data
+     * @public
+    */
+
+
     constructor(name, data){
         super()
         this.name = name
@@ -28,6 +37,11 @@ export class Datasets extends Data{
         // New Layer
         this.layer = new Layer(name)
     }
+
+    /**
+     * PointCloud
+     * @public
+    */
 
     PointCloud(){
         for(let i=0;i<this.data.length;i++){
@@ -50,6 +64,13 @@ export class Datasets extends Data{
 
         return this.layer.Layer()
     }
+
+    /**
+     * Heatmap
+     * @param {Number} size heatmap canvas size
+     * @param {Number} radius highlight radius
+     * @public
+    */
 
     Heatmap(size=60, radius=2.5){
         
