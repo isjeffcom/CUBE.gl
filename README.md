@@ -4,10 +4,10 @@
 
 
 
-CUBE.gl is a geospatial data visualization framework that allows data analytics to visualize large-scale geo-related datasets or creating digital twin in a few line of code. The CUBE.gl is built upon the three.js.
+CUBE.gl is a geospatial data visualization framework for visualizing large-scale geo-related datasets or creating digital twin in a few line of code. The CUBE.gl is built upon the three.js, powered by Web-GL.
 
 
-[Website](https://cubegl.org)
+[**Full Documentation**](https://cubegl.org)
 
 
 ## Features
@@ -130,3 +130,4 @@ Run your project, you will see an administrative map of China display in the cen
 
 
 
+[**Full Documentation**](https://cubegl.org)
