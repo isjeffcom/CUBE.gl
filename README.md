@@ -1,5 +1,7 @@
 # CUBE.gl
 
+[cover](./cover.png)
+
 CUBE.gl is a geospatial data visualization framework that allows data analytics to visualize large-scale geo-related datasets or creating digital twin in a few line of code. The CUBE.gl is built upon the three.js.
 
 
@@ -39,7 +41,7 @@ By importing the project from NPM module system, you need to install node.js. Op
 
 
 
-[Developer Guide](https://isjeffcom.github.io/CUBE.gl-doc)
+[Developer Guide](https://cubegl.org)
 
 
 
