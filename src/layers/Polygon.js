@@ -4,6 +4,13 @@ import {GenShape, GenGeometry } from '../utils/ModelBuilder'
 import { Layer } from "./Layer"
 
 export class Polygon {
+
+    /**
+     * @param {String} name: name of the layer
+     * @param {CUBE.Coordinate || Object} name: wgs84 coordinate
+     * @public
+    */
+
     constructor(name, coors){
         this.coors = coors
 
@@ -14,7 +21,7 @@ export class Polygon {
 
     /**
      * @param {Object} info {} polygon information
-     * @param {Object} options {height: 1, color: 0xffffff} merge: if use merge function to optimise performance, border: if generate border
+     * @param {Object} options {height: 1, color: 0xffffff} height: extrude height, color: color
      * @param {THREE.Material} mat replace line material
      * @public
     */

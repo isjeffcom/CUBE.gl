@@ -2,8 +2,12 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 
-
 export class Model{
+
+    /**
+     * @param {THREE.Vector3 || Object} coordinate {x,y,z} World coordinate
+     * @public
+    */
 
     constructor(coordinate){
         // If no world coordinate than computed
@@ -11,9 +15,12 @@ export class Model{
         this.object = null
     }
 
-    Update(position){
-        this.position = position
-    }
+    /**
+     * Load a GLTF model, return object only
+     * @param {THREE.Vector3 || Object} coordinate {x,y,z} World coordinate
+     * @return {THREE.Object3D} return an 3d object
+     * @public
+    */
 
     LoadGLTF(url, name, displayName, scale){
         
@@ -41,6 +48,13 @@ export class Model{
             }, null, reject)
           })
     }
+
+    /**
+     * Attach another Object3D to this.object
+     * @param {THREE.Object3D} obj another object
+     * @return {THREE.Object3D} return an 3d object
+     * @public
+    */
 
     Attach(obj){
         if(Array.isArray(obj)){
