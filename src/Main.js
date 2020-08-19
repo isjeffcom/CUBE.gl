@@ -20,7 +20,8 @@ export { Polygon } from './layers/Polygon'
 
 // Layers
 export { Layer } from './layers/Layer'
-export { GeoJsonLayer } from './layers/GeoJson'
+export { GeoLayer } from './layers/Geo' 
+export { GeoJsonLayer } from './layers/GeoJson' // Name changed, backward compatible
 export { BitmapLayer } from './layers/Bitmap'
 
 // Animation

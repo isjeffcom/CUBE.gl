@@ -172,7 +172,7 @@ export default class Data {
      * @public
     */
 
-    Text(coordinate, text, size=30, color, thickness=.1, align="left", fontface, mat){
+    Text(coordinate, text, size=30, color, thickness=.1, fontface, mat){
         const font = new CUBE_Material().TextFont(fontface ? fontface : undefined)
         
         let local_coor = new Coordinate("GPS", coordinate).ComputeWorldCoordinate()
