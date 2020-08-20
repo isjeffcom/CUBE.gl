@@ -189,7 +189,7 @@ export default class Data {
         const textColor = color ? color : 0xff0000
         let mesh = new THREE.Mesh(geometry, mat ? mat : new CUBE_Material().Text({color: textColor}))
         
-        mesh.position.set(-local_coor.world.x, local_coor.world.yy, local_coor.world.z)
+        mesh.position.set(-local_coor.world.x, local_coor.world.y, local_coor.world.z)
         mesh.name = this.name
         
         return mesh
