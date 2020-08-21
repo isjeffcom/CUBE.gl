@@ -155,7 +155,7 @@ export class GeoLayer{
             // Only render when geometry is Polygon
             if(tags && fel.geometry.type == "Polygon"){
 
-                let building = addBuilding(fel.geometry.coordinates, options.collider, info, info["tags"]["building:levels"], terrain)
+                let building = addBuilding(fel.geometry.coordinates, options.collider, info, tags["building:levels"], terrain)
 
                 if(building){
                     if(options.merge){
