@@ -1,6 +1,6 @@
 {
   "name": "cube.gl",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "CUBE.gl core. A WebGL-powered geographic data visualization framework build upon three.js.",
   "main": "dist/cube.js",
   "scripts": {
