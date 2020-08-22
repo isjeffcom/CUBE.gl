@@ -38802,6 +38802,16 @@ exports.Coordinate = void 0;
  * 
  * Notice: Be aware that the altitude is not the real altitude but the world position y-axis
 */
+// (async ()=>{
+//     const { MercatorX, MercatorY } = await import('./wasm/main.wasm')
+//     console.log(MercatorX(this.gps.latitude), MercatorY(this.gps.longitude))
+// })()
+//import { MercatorX, MercatorY } from '../wasm/main.wasm'
+const {
+  MercatorX,
+  MercatorY
+} = require("../wasm/main.wasm");
+
 class Coordinate {
   constructor(type, coor) {
     if (type === "GPS") {
@@ -38833,12 +38843,14 @@ class Coordinate {
   */
 
 
-  ComputeWorldCoordinate() {
+  async ComputeWorldCoordinate() {
     let obj = Mercator(this.gps.latitude, this.gps.longitude);
     let center = Mercator(this.center.latitude, this.center.longitude);
     this.world.x = (center.x - obj.x) * this.scale;
     this.world.z = (center.y - obj.y) * this.scale;
-    this.world.y = this.gps.altitude;
+    this.world.y = this.gps.altitude; //const { MercatorX, MercatorY } = await import('../wasm/main.wasm')
+
+    console.log(MercatorX(this.gps.latitude), MercatorY(this.gps.longitude));
     return this;
   }
   /**
@@ -38946,7 +38958,7 @@ function TileToGPS(x, y, zoom) {
     altitude: 0
   };
 }
-},{}],"../src/data/Data.js":[function(require,module,exports) {
+},{"../wasm/main.wasm":"../src/wasm/main.wasm"}],"../src/data/Data.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -60166,7 +60178,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54743" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60200" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -60342,5 +60354,136 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","../src/index.js"], null)
+},{}],"../node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
+var bundleURL = null;
+
+function getBundleURLCached() {
+  if (!bundleURL) {
+    bundleURL = getBundleURL();
+  }
+
+  return bundleURL;
+}
+
+function getBundleURL() {
+  // Attempt to find the URL of the current script and use that as the base URL
+  try {
+    throw new Error();
+  } catch (err) {
+    var matches = ('' + err.stack).match(/(https?|file|ftp|chrome-extension|moz-extension):\/\/[^)\n]+/g);
+
+    if (matches) {
+      return getBaseURL(matches[0]);
+    }
+  }
+
+  return '/';
+}
+
+function getBaseURL(url) {
+  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)\/[^/]+$/, '$1') + '/';
+}
+
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+},{}],"../node_modules/parcel-bundler/src/builtins/bundle-loader.js":[function(require,module,exports) {
+var getBundleURL = require('./bundle-url').getBundleURL;
+
+function loadBundlesLazy(bundles) {
+  if (!Array.isArray(bundles)) {
+    bundles = [bundles];
+  }
+
+  var id = bundles[bundles.length - 1];
+
+  try {
+    return Promise.resolve(require(id));
+  } catch (err) {
+    if (err.code === 'MODULE_NOT_FOUND') {
+      return new LazyPromise(function (resolve, reject) {
+        loadBundles(bundles.slice(0, -1)).then(function () {
+          return require(id);
+        }).then(resolve, reject);
+      });
+    }
+
+    throw err;
+  }
+}
+
+function loadBundles(bundles) {
+  return Promise.all(bundles.map(loadBundle));
+}
+
+var bundleLoaders = {};
+
+function registerBundleLoader(type, loader) {
+  bundleLoaders[type] = loader;
+}
+
+module.exports = exports = loadBundlesLazy;
+exports.load = loadBundles;
+exports.register = registerBundleLoader;
+var bundles = {};
+
+function loadBundle(bundle) {
+  var id;
+
+  if (Array.isArray(bundle)) {
+    id = bundle[1];
+    bundle = bundle[0];
+  }
+
+  if (bundles[bundle]) {
+    return bundles[bundle];
+  }
+
+  var type = (bundle.substring(bundle.lastIndexOf('.') + 1, bundle.length) || bundle).toLowerCase();
+  var bundleLoader = bundleLoaders[type];
+
+  if (bundleLoader) {
+    return bundles[bundle] = bundleLoader(getBundleURL() + bundle).then(function (resolved) {
+      if (resolved) {
+        module.bundle.register(id, resolved);
+      }
+
+      return resolved;
+    }).catch(function (e) {
+      delete bundles[bundle];
+      throw e;
+    });
+  }
+}
+
+function LazyPromise(executor) {
+  this.executor = executor;
+  this.promise = null;
+}
+
+LazyPromise.prototype.then = function (onSuccess, onError) {
+  if (this.promise === null) this.promise = new Promise(this.executor);
+  return this.promise.then(onSuccess, onError);
+};
+
+LazyPromise.prototype.catch = function (onError) {
+  if (this.promise === null) this.promise = new Promise(this.executor);
+  return this.promise.catch(onError);
+};
+},{"./bundle-url":"../node_modules/parcel-bundler/src/builtins/bundle-url.js"}],"../node_modules/parcel-bundler/src/builtins/loaders/browser/wasm-loader.js":[function(require,module,exports) {
+module.exports = function loadWASMBundle(bundle) {
+  return fetch(bundle).then(function (res) {
+    if (WebAssembly.instantiateStreaming) {
+      return WebAssembly.instantiateStreaming(res);
+    } else {
+      return res.arrayBuffer().then(function (data) {
+        return WebAssembly.instantiate(data);
+      });
+    }
+  }).then(function (wasmModule) {
+    return wasmModule.instance.exports;
+  });
+};
+},{}],0:[function(require,module,exports) {
+var b=require("../node_modules/parcel-bundler/src/builtins/bundle-loader.js");b.register("wasm",require("../node_modules/parcel-bundler/src/builtins/loaders/browser/wasm-loader.js"));b.load([["main.05a5c77e.wasm","../src/wasm/main.wasm"]]).then(function(){require("../src/index.js");});
+},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js",0], null)
 //# sourceMappingURL=/src.7ed060e2.js.map

@@ -7,9 +7,17 @@
  * 
  * Notice: Be aware that the altitude is not the real altitude but the world position y-axis
 */
+// (async ()=>{
+//     const { MercatorX, MercatorY } = await import('./wasm/main.wasm')
+//     console.log(MercatorX(this.gps.latitude), MercatorY(this.gps.longitude))
+// })()
+
+
+//import { MercatorX, MercatorY } from '../wasm/main.wasm'
+
+const { MercatorX, MercatorY } = require("../wasm/main.wasm")
 
 export class Coordinate{
-
     constructor(type, coor) {
         if(type === "GPS"){
             this.world = {}
@@ -35,13 +43,16 @@ export class Coordinate{
      * @public
     */
 
-    ComputeWorldCoordinate(){
+    async ComputeWorldCoordinate(){
         let obj = Mercator(this.gps.latitude, this.gps.longitude)
         let center = Mercator(this.center.latitude, this.center.longitude)
 
         this.world.x = (center.x - obj.x) * this.scale
         this.world.z = (center.y - obj.y) * this.scale
         this.world.y = this.gps.altitude
+
+        //const { MercatorX, MercatorY } = await import('../wasm/main.wasm')
+        console.log(MercatorX(this.gps.latitude), MercatorY(this.gps.longitude))
 
         return this
     }
