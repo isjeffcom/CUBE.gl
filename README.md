@@ -1,6 +1,6 @@
 # CUBE.gl
 
-<img src="./cover.png">
+<img src="[cover.png](https://i.ibb.co/5F3mpPM/Group-35.png)">
 
 
 CUBE.gl is a geospatial data visualization framework for visualizing large-scale geo-related datasets or create digital twin in a few line of code. The CUBE.gl is built upon the brilliant 3D library three.js by mrdoob, powered by Web-GL.
