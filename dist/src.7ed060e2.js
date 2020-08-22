@@ -38785,7 +38785,122 @@ exports.Shapes = Shapes;
 "use strict";Object.defineProperty(exports,"__esModule",{value:true});exports.default=void 0;function _slicedToArray(arr,i){return _arrayWithHoles(arr)||_iterableToArrayLimit(arr,i)||_unsupportedIterableToArray(arr,i)||_nonIterableRest()}function _nonIterableRest(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}function _unsupportedIterableToArray(o,minLen){if(!o)return;if(typeof o==="string")return _arrayLikeToArray(o,minLen);var n=Object.prototype.toString.call(o).slice(8,-1);if(n==="Object"&&o.constructor)n=o.constructor.name;if(n==="Map"||n==="Set")return Array.from(o);if(n==="Arguments"||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))return _arrayLikeToArray(o,minLen)}function _arrayLikeToArray(arr,len){if(len==null||len>arr.length)len=arr.length;for(var i=0,arr2=new Array(len);i<len;i++){arr2[i]=arr[i]}return arr2}function _iterableToArrayLimit(arr,i){if(typeof Symbol==="undefined"||!(Symbol.iterator in Object(arr)))return;var _arr=[];var _n=true;var _d=false;var _e=undefined;try{for(var _i=arr[Symbol.iterator](),_s;!(_n=(_s=_i.next()).done);_n=true){_arr.push(_s.value);if(i&&_arr.length===i)break}}catch(err){_d=true;_e=err}finally{try{if(!_n&&_i["return"]!=null)_i["return"]()}finally{if(_d)throw _e}}return _arr}function _arrayWithHoles(arr){if(Array.isArray(arr))return arr}var wktToPolygon=function wktToPolygon(wkt){if(!wkt.startsWith("POLYGON")){throw new Error("Invalid wkt.")}var coordsText=wkt.slice(wkt.indexOf("(")+2,wkt.indexOf(")")).split(", ");var polygon=coordsText.map(function(coordText){var _coordText$split=coordText.split(" "),_coordText$split2=_slicedToArray(_coordText$split,2),longitude=_coordText$split2[0],latitude=_coordText$split2[1];return{longitude:parseFloat(longitude),latitude:parseFloat(latitude)}});return polygon};var _default=wktToPolygon;exports.default=_default;
 },{}],"../node_modules/geolib/es/index.js":[function(require,module,exports) {
 "use strict";Object.defineProperty(exports,"__esModule",{value:true});var _exportNames={computeDestinationPoint:true,convertArea:true,convertDistance:true,convertSpeed:true,decimalToSexagesimal:true,findNearest:true,getAreaOfPolygon:true,getBounds:true,getBoundsOfDistance:true,getCenter:true,getCenterOfBounds:true,getCompassDirection:true,getCoordinateKey:true,getCoordinateKeys:true,getDistance:true,getDistanceFromLine:true,getGreatCircleBearing:true,getLatitude:true,getLongitude:true,getPathLength:true,getPreciseDistance:true,getRhumbLineBearing:true,getRoughCompassDirection:true,getSpeed:true,isDecimal:true,isPointInLine:true,isPointInPolygon:true,isPointNearLine:true,isPointWithinRadius:true,isSexagesimal:true,isValidCoordinate:true,isValidLatitude:true,isValidLongitude:true,orderByDistance:true,sexagesimalToDecimal:true,toDecimal:true,toRad:true,toDeg:true,wktToPolygon:true};Object.defineProperty(exports,"computeDestinationPoint",{enumerable:true,get:function get(){return _computeDestinationPoint.default}});Object.defineProperty(exports,"convertArea",{enumerable:true,get:function get(){return _convertArea.default}});Object.defineProperty(exports,"convertDistance",{enumerable:true,get:function get(){return _convertDistance.default}});Object.defineProperty(exports,"convertSpeed",{enumerable:true,get:function get(){return _convertSpeed.default}});Object.defineProperty(exports,"decimalToSexagesimal",{enumerable:true,get:function get(){return _decimalToSexagesimal.default}});Object.defineProperty(exports,"findNearest",{enumerable:true,get:function get(){return _findNearest.default}});Object.defineProperty(exports,"getAreaOfPolygon",{enumerable:true,get:function get(){return _getAreaOfPolygon.default}});Object.defineProperty(exports,"getBounds",{enumerable:true,get:function get(){return _getBounds.default}});Object.defineProperty(exports,"getBoundsOfDistance",{enumerable:true,get:function get(){return _getBoundsOfDistance.default}});Object.defineProperty(exports,"getCenter",{enumerable:true,get:function get(){return _getCenter.default}});Object.defineProperty(exports,"getCenterOfBounds",{enumerable:true,get:function get(){return _getCenterOfBounds.default}});Object.defineProperty(exports,"getCompassDirection",{enumerable:true,get:function get(){return _getCompassDirection.default}});Object.defineProperty(exports,"getCoordinateKey",{enumerable:true,get:function get(){return _getCoordinateKey.default}});Object.defineProperty(exports,"getCoordinateKeys",{enumerable:true,get:function get(){return _getCoordinateKeys.default}});Object.defineProperty(exports,"getDistance",{enumerable:true,get:function get(){return _getDistance.default}});Object.defineProperty(exports,"getDistanceFromLine",{enumerable:true,get:function get(){return _getDistanceFromLine.default}});Object.defineProperty(exports,"getGreatCircleBearing",{enumerable:true,get:function get(){return _getGreatCircleBearing.default}});Object.defineProperty(exports,"getLatitude",{enumerable:true,get:function get(){return _getLatitude.default}});Object.defineProperty(exports,"getLongitude",{enumerable:true,get:function get(){return _getLongitude.default}});Object.defineProperty(exports,"getPathLength",{enumerable:true,get:function get(){return _getPathLength.default}});Object.defineProperty(exports,"getPreciseDistance",{enumerable:true,get:function get(){return _getPreciseDistance.default}});Object.defineProperty(exports,"getRhumbLineBearing",{enumerable:true,get:function get(){return _getRhumbLineBearing.default}});Object.defineProperty(exports,"getRoughCompassDirection",{enumerable:true,get:function get(){return _getRoughCompassDirection.default}});Object.defineProperty(exports,"getSpeed",{enumerable:true,get:function get(){return _getSpeed.default}});Object.defineProperty(exports,"isDecimal",{enumerable:true,get:function get(){return _isDecimal.default}});Object.defineProperty(exports,"isPointInLine",{enumerable:true,get:function get(){return _isPointInLine.default}});Object.defineProperty(exports,"isPointInPolygon",{enumerable:true,get:function get(){return _isPointInPolygon.default}});Object.defineProperty(exports,"isPointNearLine",{enumerable:true,get:function get(){return _isPointNearLine.default}});Object.defineProperty(exports,"isPointWithinRadius",{enumerable:true,get:function get(){return _isPointWithinRadius.default}});Object.defineProperty(exports,"isSexagesimal",{enumerable:true,get:function get(){return _isSexagesimal.default}});Object.defineProperty(exports,"isValidCoordinate",{enumerable:true,get:function get(){return _isValidCoordinate.default}});Object.defineProperty(exports,"isValidLatitude",{enumerable:true,get:function get(){return _isValidLatitude.default}});Object.defineProperty(exports,"isValidLongitude",{enumerable:true,get:function get(){return _isValidLongitude.default}});Object.defineProperty(exports,"orderByDistance",{enumerable:true,get:function get(){return _orderByDistance.default}});Object.defineProperty(exports,"sexagesimalToDecimal",{enumerable:true,get:function get(){return _sexagesimalToDecimal.default}});Object.defineProperty(exports,"toDecimal",{enumerable:true,get:function get(){return _toDecimal.default}});Object.defineProperty(exports,"toRad",{enumerable:true,get:function get(){return _toRad.default}});Object.defineProperty(exports,"toDeg",{enumerable:true,get:function get(){return _toDeg.default}});Object.defineProperty(exports,"wktToPolygon",{enumerable:true,get:function get(){return _wktToPolygon.default}});var _computeDestinationPoint=_interopRequireDefault(require("./computeDestinationPoint"));var _convertArea=_interopRequireDefault(require("./convertArea"));var _convertDistance=_interopRequireDefault(require("./convertDistance"));var _convertSpeed=_interopRequireDefault(require("./convertSpeed"));var _decimalToSexagesimal=_interopRequireDefault(require("./decimalToSexagesimal"));var _findNearest=_interopRequireDefault(require("./findNearest"));var _getAreaOfPolygon=_interopRequireDefault(require("./getAreaOfPolygon"));var _getBounds=_interopRequireDefault(require("./getBounds"));var _getBoundsOfDistance=_interopRequireDefault(require("./getBoundsOfDistance"));var _getCenter=_interopRequireDefault(require("./getCenter"));var _getCenterOfBounds=_interopRequireDefault(require("./getCenterOfBounds"));var _getCompassDirection=_interopRequireDefault(require("./getCompassDirection"));var _getCoordinateKey=_interopRequireDefault(require("./getCoordinateKey"));var _getCoordinateKeys=_interopRequireDefault(require("./getCoordinateKeys"));var _getDistance=_interopRequireDefault(require("./getDistance"));var _getDistanceFromLine=_interopRequireDefault(require("./getDistanceFromLine"));var _getGreatCircleBearing=_interopRequireDefault(require("./getGreatCircleBearing"));var _getLatitude=_interopRequireDefault(require("./getLatitude"));var _getLongitude=_interopRequireDefault(require("./getLongitude"));var _getPathLength=_interopRequireDefault(require("./getPathLength"));var _getPreciseDistance=_interopRequireDefault(require("./getPreciseDistance"));var _getRhumbLineBearing=_interopRequireDefault(require("./getRhumbLineBearing"));var _getRoughCompassDirection=_interopRequireDefault(require("./getRoughCompassDirection"));var _getSpeed=_interopRequireDefault(require("./getSpeed"));var _isDecimal=_interopRequireDefault(require("./isDecimal"));var _isPointInLine=_interopRequireDefault(require("./isPointInLine"));var _isPointInPolygon=_interopRequireDefault(require("./isPointInPolygon"));var _isPointNearLine=_interopRequireDefault(require("./isPointNearLine"));var _isPointWithinRadius=_interopRequireDefault(require("./isPointWithinRadius"));var _isSexagesimal=_interopRequireDefault(require("./isSexagesimal"));var _isValidCoordinate=_interopRequireDefault(require("./isValidCoordinate"));var _isValidLatitude=_interopRequireDefault(require("./isValidLatitude"));var _isValidLongitude=_interopRequireDefault(require("./isValidLongitude"));var _orderByDistance=_interopRequireDefault(require("./orderByDistance"));var _sexagesimalToDecimal=_interopRequireDefault(require("./sexagesimalToDecimal"));var _toDecimal=_interopRequireDefault(require("./toDecimal"));var _toRad=_interopRequireDefault(require("./toRad"));var _toDeg=_interopRequireDefault(require("./toDeg"));var _wktToPolygon=_interopRequireDefault(require("./wktToPolygon"));var _constants=require("./constants");Object.keys(_constants).forEach(function(key){if(key==="default"||key==="__esModule")return;if(Object.prototype.hasOwnProperty.call(_exportNames,key))return;Object.defineProperty(exports,key,{enumerable:true,get:function get(){return _constants[key]}})});function _interopRequireDefault(obj){return obj&&obj.__esModule?obj:{default:obj}}
-},{"./computeDestinationPoint":"../node_modules/geolib/es/computeDestinationPoint.js","./convertArea":"../node_modules/geolib/es/convertArea.js","./convertDistance":"../node_modules/geolib/es/convertDistance.js","./convertSpeed":"../node_modules/geolib/es/convertSpeed.js","./decimalToSexagesimal":"../node_modules/geolib/es/decimalToSexagesimal.js","./findNearest":"../node_modules/geolib/es/findNearest.js","./getAreaOfPolygon":"../node_modules/geolib/es/getAreaOfPolygon.js","./getBounds":"../node_modules/geolib/es/getBounds.js","./getBoundsOfDistance":"../node_modules/geolib/es/getBoundsOfDistance.js","./getCenter":"../node_modules/geolib/es/getCenter.js","./getCenterOfBounds":"../node_modules/geolib/es/getCenterOfBounds.js","./getCompassDirection":"../node_modules/geolib/es/getCompassDirection.js","./getCoordinateKey":"../node_modules/geolib/es/getCoordinateKey.js","./getCoordinateKeys":"../node_modules/geolib/es/getCoordinateKeys.js","./getDistance":"../node_modules/geolib/es/getDistance.js","./getDistanceFromLine":"../node_modules/geolib/es/getDistanceFromLine.js","./getGreatCircleBearing":"../node_modules/geolib/es/getGreatCircleBearing.js","./getLatitude":"../node_modules/geolib/es/getLatitude.js","./getLongitude":"../node_modules/geolib/es/getLongitude.js","./getPathLength":"../node_modules/geolib/es/getPathLength.js","./getPreciseDistance":"../node_modules/geolib/es/getPreciseDistance.js","./getRhumbLineBearing":"../node_modules/geolib/es/getRhumbLineBearing.js","./getRoughCompassDirection":"../node_modules/geolib/es/getRoughCompassDirection.js","./getSpeed":"../node_modules/geolib/es/getSpeed.js","./isDecimal":"../node_modules/geolib/es/isDecimal.js","./isPointInLine":"../node_modules/geolib/es/isPointInLine.js","./isPointInPolygon":"../node_modules/geolib/es/isPointInPolygon.js","./isPointNearLine":"../node_modules/geolib/es/isPointNearLine.js","./isPointWithinRadius":"../node_modules/geolib/es/isPointWithinRadius.js","./isSexagesimal":"../node_modules/geolib/es/isSexagesimal.js","./isValidCoordinate":"../node_modules/geolib/es/isValidCoordinate.js","./isValidLatitude":"../node_modules/geolib/es/isValidLatitude.js","./isValidLongitude":"../node_modules/geolib/es/isValidLongitude.js","./orderByDistance":"../node_modules/geolib/es/orderByDistance.js","./sexagesimalToDecimal":"../node_modules/geolib/es/sexagesimalToDecimal.js","./toDecimal":"../node_modules/geolib/es/toDecimal.js","./toRad":"../node_modules/geolib/es/toRad.js","./toDeg":"../node_modules/geolib/es/toDeg.js","./wktToPolygon":"../node_modules/geolib/es/wktToPolygon.js","./constants":"../node_modules/geolib/es/constants.js"}],"../src/coordinate/Coordinate.js":[function(require,module,exports) {
+},{"./computeDestinationPoint":"../node_modules/geolib/es/computeDestinationPoint.js","./convertArea":"../node_modules/geolib/es/convertArea.js","./convertDistance":"../node_modules/geolib/es/convertDistance.js","./convertSpeed":"../node_modules/geolib/es/convertSpeed.js","./decimalToSexagesimal":"../node_modules/geolib/es/decimalToSexagesimal.js","./findNearest":"../node_modules/geolib/es/findNearest.js","./getAreaOfPolygon":"../node_modules/geolib/es/getAreaOfPolygon.js","./getBounds":"../node_modules/geolib/es/getBounds.js","./getBoundsOfDistance":"../node_modules/geolib/es/getBoundsOfDistance.js","./getCenter":"../node_modules/geolib/es/getCenter.js","./getCenterOfBounds":"../node_modules/geolib/es/getCenterOfBounds.js","./getCompassDirection":"../node_modules/geolib/es/getCompassDirection.js","./getCoordinateKey":"../node_modules/geolib/es/getCoordinateKey.js","./getCoordinateKeys":"../node_modules/geolib/es/getCoordinateKeys.js","./getDistance":"../node_modules/geolib/es/getDistance.js","./getDistanceFromLine":"../node_modules/geolib/es/getDistanceFromLine.js","./getGreatCircleBearing":"../node_modules/geolib/es/getGreatCircleBearing.js","./getLatitude":"../node_modules/geolib/es/getLatitude.js","./getLongitude":"../node_modules/geolib/es/getLongitude.js","./getPathLength":"../node_modules/geolib/es/getPathLength.js","./getPreciseDistance":"../node_modules/geolib/es/getPreciseDistance.js","./getRhumbLineBearing":"../node_modules/geolib/es/getRhumbLineBearing.js","./getRoughCompassDirection":"../node_modules/geolib/es/getRoughCompassDirection.js","./getSpeed":"../node_modules/geolib/es/getSpeed.js","./isDecimal":"../node_modules/geolib/es/isDecimal.js","./isPointInLine":"../node_modules/geolib/es/isPointInLine.js","./isPointInPolygon":"../node_modules/geolib/es/isPointInPolygon.js","./isPointNearLine":"../node_modules/geolib/es/isPointNearLine.js","./isPointWithinRadius":"../node_modules/geolib/es/isPointWithinRadius.js","./isSexagesimal":"../node_modules/geolib/es/isSexagesimal.js","./isValidCoordinate":"../node_modules/geolib/es/isValidCoordinate.js","./isValidLatitude":"../node_modules/geolib/es/isValidLatitude.js","./isValidLongitude":"../node_modules/geolib/es/isValidLongitude.js","./orderByDistance":"../node_modules/geolib/es/orderByDistance.js","./sexagesimalToDecimal":"../node_modules/geolib/es/sexagesimalToDecimal.js","./toDecimal":"../node_modules/geolib/es/toDecimal.js","./toRad":"../node_modules/geolib/es/toRad.js","./toDeg":"../node_modules/geolib/es/toDeg.js","./wktToPolygon":"../node_modules/geolib/es/wktToPolygon.js","./constants":"../node_modules/geolib/es/constants.js"}],"../node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
+var bundleURL = null;
+
+function getBundleURLCached() {
+  if (!bundleURL) {
+    bundleURL = getBundleURL();
+  }
+
+  return bundleURL;
+}
+
+function getBundleURL() {
+  // Attempt to find the URL of the current script and use that as the base URL
+  try {
+    throw new Error();
+  } catch (err) {
+    var matches = ('' + err.stack).match(/(https?|file|ftp|chrome-extension|moz-extension):\/\/[^)\n]+/g);
+
+    if (matches) {
+      return getBaseURL(matches[0]);
+    }
+  }
+
+  return '/';
+}
+
+function getBaseURL(url) {
+  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)\/[^/]+$/, '$1') + '/';
+}
+
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+},{}],"../node_modules/parcel-bundler/src/builtins/bundle-loader.js":[function(require,module,exports) {
+var getBundleURL = require('./bundle-url').getBundleURL;
+
+function loadBundlesLazy(bundles) {
+  if (!Array.isArray(bundles)) {
+    bundles = [bundles];
+  }
+
+  var id = bundles[bundles.length - 1];
+
+  try {
+    return Promise.resolve(require(id));
+  } catch (err) {
+    if (err.code === 'MODULE_NOT_FOUND') {
+      return new LazyPromise(function (resolve, reject) {
+        loadBundles(bundles.slice(0, -1)).then(function () {
+          return require(id);
+        }).then(resolve, reject);
+      });
+    }
+
+    throw err;
+  }
+}
+
+function loadBundles(bundles) {
+  return Promise.all(bundles.map(loadBundle));
+}
+
+var bundleLoaders = {};
+
+function registerBundleLoader(type, loader) {
+  bundleLoaders[type] = loader;
+}
+
+module.exports = exports = loadBundlesLazy;
+exports.load = loadBundles;
+exports.register = registerBundleLoader;
+var bundles = {};
+
+function loadBundle(bundle) {
+  var id;
+
+  if (Array.isArray(bundle)) {
+    id = bundle[1];
+    bundle = bundle[0];
+  }
+
+  if (bundles[bundle]) {
+    return bundles[bundle];
+  }
+
+  var type = (bundle.substring(bundle.lastIndexOf('.') + 1, bundle.length) || bundle).toLowerCase();
+  var bundleLoader = bundleLoaders[type];
+
+  if (bundleLoader) {
+    return bundles[bundle] = bundleLoader(getBundleURL() + bundle).then(function (resolved) {
+      if (resolved) {
+        module.bundle.register(id, resolved);
+      }
+
+      return resolved;
+    }).catch(function (e) {
+      delete bundles[bundle];
+      throw e;
+    });
+  }
+}
+
+function LazyPromise(executor) {
+  this.executor = executor;
+  this.promise = null;
+}
+
+LazyPromise.prototype.then = function (onSuccess, onError) {
+  if (this.promise === null) this.promise = new Promise(this.executor);
+  return this.promise.then(onSuccess, onError);
+};
+
+LazyPromise.prototype.catch = function (onError) {
+  if (this.promise === null) this.promise = new Promise(this.executor);
+  return this.promise.catch(onError);
+};
+},{"./bundle-url":"../node_modules/parcel-bundler/src/builtins/bundle-url.js"}],"../src/coordinate/Coordinate.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -38807,11 +38922,7 @@ exports.Coordinate = void 0;
 //     console.log(MercatorX(this.gps.latitude), MercatorY(this.gps.longitude))
 // })()
 //import { MercatorX, MercatorY } from '../wasm/main.wasm'
-const {
-  MercatorX,
-  MercatorY
-} = require("../wasm/main.wasm");
-
+//const { MercatorX, MercatorY } = require("../wasm/main.wasm")
 class Coordinate {
   constructor(type, coor) {
     if (type === "GPS") {
@@ -38848,8 +38959,11 @@ class Coordinate {
     let center = Mercator(this.center.latitude, this.center.longitude);
     this.world.x = (center.x - obj.x) * this.scale;
     this.world.z = (center.y - obj.y) * this.scale;
-    this.world.y = this.gps.altitude; //const { MercatorX, MercatorY } = await import('../wasm/main.wasm')
-
+    this.world.y = this.gps.altitude;
+    const {
+      MercatorX,
+      MercatorY
+    } = await require("_bundle_loader")(require.resolve('../wasm/main.wasm'));
     console.log(MercatorX(this.gps.latitude), MercatorY(this.gps.longitude));
     return this;
   }
@@ -38958,7 +39072,7 @@ function TileToGPS(x, y, zoom) {
     altitude: 0
   };
 }
-},{"../wasm/main.wasm":"../src/wasm/main.wasm"}],"../src/data/Data.js":[function(require,module,exports) {
+},{"_bundle_loader":"../node_modules/parcel-bundler/src/builtins/bundle-loader.js","../wasm/main.wasm":[["main.05a5c77e.wasm","../src/wasm/main.wasm"],"../src/wasm/main.wasm"]}],"../src/data/Data.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -60178,7 +60292,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60200" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63304" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -60354,122 +60468,7 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}],"../node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
-var bundleURL = null;
-
-function getBundleURLCached() {
-  if (!bundleURL) {
-    bundleURL = getBundleURL();
-  }
-
-  return bundleURL;
-}
-
-function getBundleURL() {
-  // Attempt to find the URL of the current script and use that as the base URL
-  try {
-    throw new Error();
-  } catch (err) {
-    var matches = ('' + err.stack).match(/(https?|file|ftp|chrome-extension|moz-extension):\/\/[^)\n]+/g);
-
-    if (matches) {
-      return getBaseURL(matches[0]);
-    }
-  }
-
-  return '/';
-}
-
-function getBaseURL(url) {
-  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)\/[^/]+$/, '$1') + '/';
-}
-
-exports.getBundleURL = getBundleURLCached;
-exports.getBaseURL = getBaseURL;
-},{}],"../node_modules/parcel-bundler/src/builtins/bundle-loader.js":[function(require,module,exports) {
-var getBundleURL = require('./bundle-url').getBundleURL;
-
-function loadBundlesLazy(bundles) {
-  if (!Array.isArray(bundles)) {
-    bundles = [bundles];
-  }
-
-  var id = bundles[bundles.length - 1];
-
-  try {
-    return Promise.resolve(require(id));
-  } catch (err) {
-    if (err.code === 'MODULE_NOT_FOUND') {
-      return new LazyPromise(function (resolve, reject) {
-        loadBundles(bundles.slice(0, -1)).then(function () {
-          return require(id);
-        }).then(resolve, reject);
-      });
-    }
-
-    throw err;
-  }
-}
-
-function loadBundles(bundles) {
-  return Promise.all(bundles.map(loadBundle));
-}
-
-var bundleLoaders = {};
-
-function registerBundleLoader(type, loader) {
-  bundleLoaders[type] = loader;
-}
-
-module.exports = exports = loadBundlesLazy;
-exports.load = loadBundles;
-exports.register = registerBundleLoader;
-var bundles = {};
-
-function loadBundle(bundle) {
-  var id;
-
-  if (Array.isArray(bundle)) {
-    id = bundle[1];
-    bundle = bundle[0];
-  }
-
-  if (bundles[bundle]) {
-    return bundles[bundle];
-  }
-
-  var type = (bundle.substring(bundle.lastIndexOf('.') + 1, bundle.length) || bundle).toLowerCase();
-  var bundleLoader = bundleLoaders[type];
-
-  if (bundleLoader) {
-    return bundles[bundle] = bundleLoader(getBundleURL() + bundle).then(function (resolved) {
-      if (resolved) {
-        module.bundle.register(id, resolved);
-      }
-
-      return resolved;
-    }).catch(function (e) {
-      delete bundles[bundle];
-      throw e;
-    });
-  }
-}
-
-function LazyPromise(executor) {
-  this.executor = executor;
-  this.promise = null;
-}
-
-LazyPromise.prototype.then = function (onSuccess, onError) {
-  if (this.promise === null) this.promise = new Promise(this.executor);
-  return this.promise.then(onSuccess, onError);
-};
-
-LazyPromise.prototype.catch = function (onError) {
-  if (this.promise === null) this.promise = new Promise(this.executor);
-  return this.promise.catch(onError);
-};
-},{"./bundle-url":"../node_modules/parcel-bundler/src/builtins/bundle-url.js"}],"../node_modules/parcel-bundler/src/builtins/loaders/browser/wasm-loader.js":[function(require,module,exports) {
+},{}],"../node_modules/parcel-bundler/src/builtins/loaders/browser/wasm-loader.js":[function(require,module,exports) {
 module.exports = function loadWASMBundle(bundle) {
   return fetch(bundle).then(function (res) {
     if (WebAssembly.instantiateStreaming) {
@@ -60484,6 +60483,6 @@ module.exports = function loadWASMBundle(bundle) {
   });
 };
 },{}],0:[function(require,module,exports) {
-var b=require("../node_modules/parcel-bundler/src/builtins/bundle-loader.js");b.register("wasm",require("../node_modules/parcel-bundler/src/builtins/loaders/browser/wasm-loader.js"));b.load([["main.05a5c77e.wasm","../src/wasm/main.wasm"]]).then(function(){require("../src/index.js");});
-},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js",0], null)
+var b=require("../node_modules/parcel-bundler/src/builtins/bundle-loader.js");b.register("wasm",require("../node_modules/parcel-bundler/src/builtins/loaders/browser/wasm-loader.js"));
+},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js",0,"../src/index.js"], null)
 //# sourceMappingURL=/src.7ed060e2.js.map
