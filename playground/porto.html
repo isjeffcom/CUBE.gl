@@ -1,0 +1,91 @@
+<html>
+    <head>
+        <title>Proto Taxi Traffic</title>
+        <link rel="icon" href="./favicon.png">
+    </head>
+
+    <body>
+        <div id="loading" style="position:fixed; height: 100%; width: 100%; left: 0px; top: 0px; background: #000; display: block; color: #fff;">
+            <div style="margin-top: 100px; width: 100%; text-align:center;">Loading</div>
+        </div>
+        <div id="cont" style="position: absolute; width: 100%; height: 100%;"></div>
+    </body>
+
+    <script src="../src/index.js"></script>
+    
+    <script>
+        let C
+
+        const Center = {latitude: 41.157937, longitude: -8.629108} // porto
+
+        // Get Container
+        const container = document.getElementById('cont')
+
+        Init()
+        Update()
+
+        async function Init(){
+
+            // Init CUBE Instance
+            C = new CUBE.Space(container, {
+                background: "333333", 
+                center: Center, 
+                scale: 10,
+                camera: {
+                    position:{x: 20, y: 20, z: 20}
+                }
+            })
+
+            // Init Animation Engine
+            let aniEngine = new CUBE.AnimationEngine(C)
+            C.SetAniEngine(aniEngine)
+
+            //Add Geojson Building Layer
+            let ed = await (await fetch('./assets/porto/building.geojson')).json()
+            let buildings = new CUBE.GeoJsonLayer("city_buildings", ed).Buildings({merge: true})
+            C.Add(buildings)
+
+            // // Add a ground
+            let ground = new CUBE.Terrain().Ground(800, 800, 8)
+            C.Add(ground)
+            ground.position.y = -2.4
+
+
+            // porto Taxi
+            let taxi = await fetch('./assets/porto/taxi.json')
+            taxi = await taxi.json()
+            taxi.forEach((single, index) => {
+
+                let path = JSON.parse(single["path"])
+                if(path.length < 1) return
+                let taxiSingle = new CUBE.Data().Sphere({latitude: path[0][0], longitude: path[0][1]}, 1, .03)
+                C.Add(taxiSingle)
+                
+                let aniPath = []
+                for(let ic=0;ic<path.length;ic++){
+                    let ics = path[ic]
+                    aniPath.push({latitude: ics[1], longitude: ics[0]}) // normally is 0 and 1, but it depended on data source
+                }
+
+                let mAni = new CUBE.Animation(single["id"], taxiSingle, "tween", {startNow: true, repeat: true}).GPSPath(aniPath, 100000)
+                C.GetAniEngine().Register(mAni)
+                    
+            })
+
+            document.getElementById("loading").style.display = "none"
+        }
+
+        function Update(){
+            requestAnimationFrame(Update)
+            C.Runtime()
+        }
+    </script>
+
+
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</html>

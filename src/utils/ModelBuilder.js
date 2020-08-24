@@ -53,19 +53,20 @@ export function GenShape(points, options){
 
 export function GenHelper(geometry){
 
-    if(!geometry.boundingBox){
-        geometry.computeBoundingBox()
-    }
+    geometry.computeBoundingBox()
+    geometry.computeBoundingSphere()
+    
+    // let box3 = geometry.boundingBox
 
-    let box3 = geometry.boundingBox
+    // if(!isFinite(box3.max.x)){
+    //     return false
+    // }
 
-    if(!isFinite(box3.max.x)){
-        return false
-    }
+    // let helper = new THREE.Box3Helper( box3, 0xffff00 )
+    // // Project new position
+    // helper.updateMatrixWorld()
 
-    let helper = new THREE.Box3Helper( box3, 0xffff00 )
-    // Project new position
-    helper.updateMatrixWorld()
+    let helper = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial())
 
     return helper
 }

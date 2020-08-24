@@ -33,7 +33,7 @@ export function DefaultConfig(){
             "enabled": false,
             "speed": 1
         },
-        "minDistance": 5,
+        "minDistance": 1,
         "maxDistance": 800
   
     },
@@ -99,6 +99,14 @@ export function DefaultConfig(){
         "near": 50,
         "far": 150
     },
-    "debug": false
+    "interaction": {
+      select: false,
+      hover: false
+    },
+    "debug": false,
+    "lab":{
+      "wasm": false
+    }
+    
   }
 }

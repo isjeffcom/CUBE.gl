@@ -1,0 +1,11 @@
+[
+    {
+        "type": "gltf",
+        "obj": "assets/models/building/scene.gltf",
+        "mtl": "",
+        "name": "Building",
+        "displayName": "Test-Building",
+        "scale": 1,
+        "position": { "x": 1, "y": 50, "z": 1}
+    }
+]

@@ -8,16 +8,6 @@
  * Notice: Be aware that the altitude is not the real altitude but the world position y-axis
 */
 
-// (async ()=>{
-//     const { MercatorX, MercatorY } = await import('./wasm/main.wasm')
-//     console.log(MercatorX(this.gps.latitude), MercatorY(this.gps.longitude))
-// })()
-
-
-//import { MercatorX, MercatorY } from '../wasm/main.wasm'
-
-//const { MercatorX, MercatorY } = require("../wasm/main.wasm")
-
 export class Coordinate{
     constructor(type, coor) {
         if(type === "GPS"){
@@ -44,16 +34,17 @@ export class Coordinate{
      * @public
     */
 
-    async ComputeWorldCoordinate(){
-        let obj = Mercator(this.gps.latitude, this.gps.longitude)
-        let center = Mercator(this.center.latitude, this.center.longitude)
+    ComputeWorldCoordinate(){
 
+        let obj = Mercator(this.gps.latitude, this.gps.longitude)
+
+        let center = Mercator(this.center.latitude, this.center.longitude)
         this.world.x = (center.x - obj.x) * this.scale
         this.world.z = (center.y - obj.y) * this.scale
         this.world.y = this.gps.altitude
 
-        const { MercatorX, MercatorY } = await import('../wasm/main.wasm')
-        console.log(MercatorX(this.gps.latitude), MercatorY(this.gps.longitude))
+        //const { MercatorX, MercatorY } = await import('../wasm/main.wasm')
+        //console.log(MercatorX(this.gps.latitude), MercatorY(this.gps.longitude))
 
         return this
     }
@@ -131,13 +122,23 @@ class WorldCoordinate{
 */
 
 function Mercator(lat, lon) {
-    var mercator = {}
-    var earthRad = 6378.137
 
-    mercator.x = lon * Math.PI / 180 * earthRad
-    var a = lat * Math.PI / 180
-    mercator.y = earthRad / 2 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)))
-    return mercator
+
+    if(window.CUBE_GLOBAL.WASM){
+        let x = window.CUBE_GLOBAL.WASMCAL.MercatorX(lat)
+        let y = window.CUBE_GLOBAL.WASMCAL.MercatorX(lon)
+        return { x: x, y: y}
+    } else {
+        let mercator = {x: 0, y: 0}
+        let earthRad = 6378.137
+
+        mercator.x = lon * Math.PI / 180 * earthRad
+        let a = lat * Math.PI / 180
+        mercator.y = earthRad / 2 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)))
+
+        return mercator
+    }
+    
 }
 
 // function MercatorReverse(x, y) {

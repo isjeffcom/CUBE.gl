@@ -12,9 +12,14 @@ export class AnimationEngine{
     }
 
     Register(animation){
+
+        // Instant tween will not be recorded
+        if(animation.type === "ins_tween") // do nothing
+
         if(animation.type === "tween"){
             this.allTween.push(animation)
             this.aniGroup.Add(animation.object)
+            //this.CleanTween()
         }
 
         if(animation.type === "circular"){
@@ -40,6 +45,24 @@ export class AnimationEngine{
         this.ins.Delete(this.aniGroup)
     }
 
+    // Clean Tween Animation of which already stopped
+    CleanTween(){
+
+        if(this.allTween.length < 1) return
+
+        let readyToDel = []
+        for(let i=0;i<this.allTween.length;i++){
+            if(this.allTween[i] && this.allTween[i].options.haveEnd && this.allTween[i].tween._isPlaying == false){
+                readyToDel.push(i)
+            }
+        }
+
+        for(let c=0;c<readyToDel.length;c++){
+            this.allTween[c].Destroy()
+            this.allTween.splice(readyToDel, 1)
+        }
+    }
+
     Update(){
         if(this.allCircular.length > 0){
 
@@ -60,10 +83,8 @@ export class AnimationEngine{
             })
         }
 
-        if(this.allTween.length > 0){
-    
-            TWEEN.update()
-        }
+        // Tweenjs instance update
+        TWEEN.update()
 
         if(this.allDash.length > 0){
     

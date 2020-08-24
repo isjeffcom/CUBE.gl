@@ -1,0 +1,56 @@
+[
+    {
+    "name": "enviorment",
+    "type": "Ambient",
+    "color":"fafafa",
+    "opacity": 0.15
+  },
+  {
+    "name": "front-left",
+    "type": "Point",
+    "color": "fafafa",
+    "opacity": 0.1,
+    "shadow": false,
+    "position": {
+      "x": 200,
+      "y": 90,
+      "z": 40
+    }
+  },
+  {
+    "name": "front-right",
+    "type": "Point",
+    "color": "fafafa",
+    "opacity": 0.1,
+    "shadow": false,
+    "position": {
+      "x": 200,
+      "y": 90,
+      "z": -40
+    }
+  },
+  {
+    "name": "back-left",
+    "type": "Point",
+    "color": "fafafa",
+    "opacity": 0.5,
+    "shadow": true,
+    "position": {
+      "x": -200,
+      "y": 90,
+      "z": -40
+    }
+  },
+  {
+    "name": "back-right",
+    "type": "Point",
+    "color": "fafafa",
+    "opacity": 0.1,
+    "shadow": false,
+    "position": {
+      "x": -200,
+      "y": 90,
+      "z": -40
+    }
+  }
+]

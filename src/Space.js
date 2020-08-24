@@ -2,11 +2,15 @@ import * as THREE from 'three'
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { DefaultConfig } from './static/Config.js'
 import Stats from 'three/examples/jsm/libs/stats.module.js'
+
 import merge from 'deepmerge'
 import { Clone } from './utils/Clone'
+import { Listener } from './Listener.js'
 
-// Import
+
 import './static/Global'
+import { Action } from './action/Action.js'
+
 
 /**
  * Create a space, main CUBE instance
@@ -24,18 +28,25 @@ export class Space {
 
     constructor(container, opt={}){
 
-        // Update Global Config
+        this.three = THREE
+        this.container = container
+
+        // Update Global Config, center and scale is essential
         window.CUBE_GLOBAL.CENTER = opt.center ? Clone(opt.center) : window.CUBE_GLOBAL.CENTER
         window.CUBE_GLOBAL.MAP_SCALE = opt.scale ? opt.scale : window.CUBE_GLOBAL.MAP_SCALE
-        
-        this.scale = window.CUBE_GLOBAL.MAP_SCALE
 
-        this.three = THREE
 
         // Merge or overwrite options 
         let DefaultOptions = DefaultConfig()
         let options = opt ? merge(DefaultOptions, opt) : DefaultOptions
         this.options = options
+
+
+        // Activate WASM
+        if(options.lab.wasm) this.InitWASM()
+
+        // Global Scale
+        this.scale = window.CUBE_GLOBAL.MAP_SCALE
 
         // Map Center 
         this.center = options.center
@@ -68,8 +79,7 @@ export class Space {
         this.renderer.setSize(window.innerWidth, window.innerHeight)
 
         // Print render result to canvas container
-        container.appendChild(this.renderer.domElement)
-
+        this.container.appendChild(this.renderer.domElement)
 
         // Init Control
         this.controls = new MapControls( this.camera, this.renderer.domElement )
@@ -96,55 +106,24 @@ export class Space {
         // 调试模式
         if(options.debug){
             this.stats = new Stats()
-            container.appendChild( this.stats.dom )
+            this.container.appendChild( this.stats.dom )
         }
-
-        // Save Instance to global for internal access
-        //window.CUBE_GLOBAL.INS = this
 
         // Auto resize
         this.WindowResize()
         
-        window.addEventListener( 'resize', ()=>{
+        window.addEventListener('resize', ()=>{
             this.WindowResize(window)
         }, false )
+
+        // Interaction
+        this.listener = new Listener(this.container, options.interaction)
+        this.Action = new Action(this)
     }
 
-    Ray(event, layer){
-        let mouse = {}
-        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1
-        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1
-        this.raycaster.setFromCamera( mouse, this.camera )
-        let intersects = this.raycaster.intersectObjects( layer )
-        return intersects
-    }
+    
 
-    /**
-     * Runtime rendering and controls/animation updates. Call it in requestAnimationFrame or setTimeout(()=>{}, gap)
-     * @public
-    */
-
-    Runtime(){
-        this.delta = this.clock.getDelta()
-        this.time += this.delta
-
-        this.renderer.render(this.scene, this.camera)
-        this.controls.update()
-
-        if(this.AniEngine){
-            if(this.isViewable()) this.AniEngine.Update()
-        }
-
-        if(this.ShaderEngine) this.ShaderEngine.Update()
-
-        if(this.hasLookAt){
-            this.lookats.forEach(LAObj => {
-                if(LAObj) LAObj.lookAt(this.camera.position)
-            })
-        }
-        
-        if(this.options.debug) this.stats.update()
-    }
+    // OBJECT MANIPULATION
 
     /**
      * Add an 3d object into scene
@@ -208,7 +187,7 @@ export class Space {
     */
 
     DeleteLayer(name){
-        let group = this.FindLayer(name)
+        let group = this.Find(name)
         for(let i=0;i<group.children.length;i++){
             let mesh = group.children[i]
             this.Delete(mesh, group)
@@ -218,24 +197,93 @@ export class Space {
 
     /**
      * Find a group in scene
-     * @param {String} name Group name you wish to search for
+     * @param {String || Number || THREE.Object3D} obj you wish to search for
+     * @param {Object} group layer
      * @public
     */
 
-    // Find a group 找到组
-    Find(name){
+    // Find an object 找到某个对象
+    Find(obj, group){
 
-        let res = null
-        let groups = this.scene.children
+        group = group ? group : this.scene
 
-        for(let i=0;i<groups.length;i++){
-            if(groups[i].name == name){
-                res = groups[i]
+        if(typeof obj === "string") return group.getObjectByName(obj)
+
+        if(typeof obj === "number") return group.getObjectById(obj)
+
+        if(typeof obj === "object" && obj["type"] === "Mesh") return obj
+
+        // if(obj["children"] && Array.isArray(obj["chilren"])){
+        //     for(let i=0;i<group.children.length;i++){
+        //         if(obj === group.children[i]){
+        //             return obj
+        //         }
+        //     }
+        // }
+    }
+
+    /**
+     * Set an object always lookat camera
+     * @param {object3D} obj an array of type and THREE.Light objects. { "name": "front-left", "type": "Point", "color": "fafafa", "opacity": 0.4, "shadow": false,"position": {"x": 200, "y": 90, "z": 40}
+     * @public
+    */
+
+    SetLookAt(object){
+        this.lookats.push(object)
+        if(this.lookats.length > 0) this.hasLookAt = true
+    }
+
+    /**
+     * Remove an object always lookat camera
+     * @param {object3D} obj an array of type and THREE.Light objects. { "name": "front-left", "type": "Point", "color": "fafafa", "opacity": 0.4, "shadow": false,"position": {"x": 200, "y": 90, "z": 40}
+     * @public
+    */
+
+    RemoveLookAt(obj){
+        let ready = []
+        for(let i=0;i<this.lookats.length;i++){
+            let lookat = this.lookats[i]
+            if(lookat === obj){
+                ready.push(i)
             }
         }
 
-        return res
+        for(let ii=0;ii<ready.length;ii++){
+            this.lookats.splice(ready[ii], 1)
+        }
     }
+
+    // RUNTIME AND ANIMATION
+
+    /**
+     * Runtime rendering and controls/animation updates. Call it in requestAnimationFrame or setTimeout(()=>{}, gap)
+     * @public
+    */
+
+   Runtime(){
+        this.delta = this.clock.getDelta()
+        this.time += this.delta
+
+        this.renderer.render(this.scene, this.camera)
+        this.controls.update()
+
+        if(this.AniEngine){
+            //if(this.isViewable()) this.AniEngine.Update()
+            this.AniEngine.Update()
+        }
+
+        if(this.ShaderEngine) this.ShaderEngine.Update()
+
+        if(this.hasLookAt){
+            this.lookats.forEach(LAObj => {
+                if(LAObj) LAObj.lookAt(this.camera.position)
+            })
+        }
+        
+        if(this.options.debug) this.stats.update()
+    }
+
+    // ENGINES
 
     /**
      * @class Getter to return current AnimationEngine
@@ -271,40 +319,11 @@ export class Space {
     */
 
     SetShaderEngine(shaderEngine){
-        if(this.ShaderEngine){ console.e("ShaderEngine has existed. You cannot add twice."); return }
+        if(this.ShaderEngine){ console.e("Shader Engine has existed."); return }
         this.ShaderEngine = shaderEngine
     }
 
-    /**
-     * Set an object always lookat camera
-     * @param {object3D} obj an array of type and THREE.Light objects. { "name": "front-left", "type": "Point", "color": "fafafa", "opacity": 0.4, "shadow": false,"position": {"x": 200, "y": 90, "z": 40}
-     * @public
-    */
-
-    SetLookAt(object){
-        this.lookats.push(object)
-        if(this.lookats.length > 0) this.hasLookAt = true
-    }
-
-    /**
-     * Remove an object always lookat camera
-     * @param {object3D} obj an array of type and THREE.Light objects. { "name": "front-left", "type": "Point", "color": "fafafa", "opacity": 0.4, "shadow": false,"position": {"x": 200, "y": 90, "z": 40}
-     * @public
-    */
-
-    RemoveLookAt(obj){
-        let ready = []
-        for(let i=0;i<this.lookats.length;i++){
-            let lookat = this.lookats[i]
-            if(lookat === obj){
-                ready.push(i)
-            }
-        }
-
-        for(let ii=0;ii<ready.length;ii++){
-            this.lookats.splice(ready[ii], 1)
-        }
-    }
+    // INIT LOODER
 
     /**
      * Find a group in scene
@@ -337,8 +356,13 @@ export class Space {
         
     }
 
+    /**
+     * Check if camera too far then stop animation
+     * @public
+    */
+
     isViewable(){
-        if(this.camera.position.y < 60 && this.camera.position.x < 60){
+        if(this.camera.position.y < this.scale * 6 && this.camera.position.x < this.scale * 6){
             return true
         } else {
             return false
@@ -355,4 +379,65 @@ export class Space {
         this.camera.updateProjectionMatrix()
         this.renderer.setSize( window.innerWidth, window.innerHeight )
     }
+
+
+    /**
+     * Init WASM module and loaded to global env
+     * @public
+    */
+
+    async InitWASM(){
+        window.CUBE_GLOBAL.WASMCAL = await import("./wasm/main.wasm")
+        window.CUBE_GLOBAL.WASM = true
+    }
+
+    /**
+     * Send a ray to check if touch/click object
+     * @param {event} event browser window event
+     * @param {THREE.Group | Array} layer 
+     * @public
+    */
+
+    Ray(event, layer){
+
+        // GeoJson Layer compatiable setting
+
+        // With merged object
+        if(layer && layer.CUBE_TYPE === "GeoLayer" && layer.CUBE_COLLIDER.enabled){
+            // Helper Debug
+            //layer = this.Find(layer.name + "_colliders", layer)
+            
+            // Production
+            layer = layer.CUBE_COLLIDER.colliders
+        }
+
+        // If not merge
+        if(layer && layer.CUBE_TYPE === "GeoLayer" && !layer.CUBE_COLLIDER.enable){
+            layer = layer.children[0]
+        }
+
+        // If is string
+        if(layer && typeof layer === "string") layer = this.Find(layer)
+
+
+        // Defind layer
+        layer = layer ? layer.children : this.scene.children
+        
+        // Get mouse information from Action() class
+        let uxEvt = event.detail.ux
+        let mouse = {
+            x: ( uxEvt.clientX / this.container.clientWidth ) * 2 - 1, 
+            y: - ( uxEvt.clientY / this.container.clientHeight ) * 2 + 1
+        }
+
+        // Update Ray position as camera position
+        this.raycaster.setFromCamera( mouse, this.camera )
+
+        // Fire ray, check all objects intersect with the ray
+        let intersects = this.raycaster.intersectObjects( layer )
+        
+        return intersects.length > 0 ? intersects[0].object : null
+
+    }
+    
 }

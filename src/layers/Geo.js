@@ -36,7 +36,11 @@ export class GeoLayer{
         this.layer_borders = new Layer(name + "_borders")
 
         // Collider Group (if needed)
-        this.layer_colliders = new Layer(name + "_collider")
+        this.layer_colliders = new Layer(name + "_colliders")
+        this.layer.Layer().CUBE_COLLIDER = {enabled: false, colliders: []}
+
+        // Set type
+        this.layer.Layer().CUBE_TYPE = "GeoLayer"
     }
 
     /**
@@ -60,6 +64,9 @@ export class GeoLayer{
         let height = options.height ? options.height : 2
 
         let geometries = []
+
+        // if merge is false, force collider to false
+        options.collider = options.merge ? options.collider : false
 
         // Render all buildings
         for(let i=0;i<features.length;i++){
@@ -114,7 +121,10 @@ export class GeoLayer{
         }
         
         this.layer.Add(this.layer_objects.Layer())
-        if(options.collider) this.layer.Add(this.layer_colliders.Layer())
+        if(options.collider){
+            this.layer.Layer().CUBE_COLLIDER.colliders = this.layer_colliders.Layer()
+            this.layer.Layer().CUBE_COLLIDER.enabled = true
+        }
         this.layer.Add(this.layer_borders.Layer())
 
         return this.layer.Layer()
@@ -140,6 +150,9 @@ export class GeoLayer{
         let features = this.geojson
 
         let geometries = []
+
+        // if merge is false, force collider to false
+        options.collider = options.merge ? options.collider : false
 
         // Render all building
         for(let i=0;i<features.length;i++){
@@ -170,9 +183,15 @@ export class GeoLayer{
                 if(building){
                     if(options.merge){
                         geometries.push(building.geometry)
+                        building.helper.updateMatrixWorld()
                         if(options.collider) this.layer_colliders.Add(building.helper) // Invisiable collider
                     } else {
-                        this.layer_objects.Add(new THREE.Mesh(building.geometry, this.mat_building))
+                        let mesh = new THREE.Mesh(building.geometry, this.mat_building)
+                        let n = verify(info, "name")
+                        mesh.name = n ? n : "building"
+                        mesh.info = info
+                        this.layer_objects.Add(mesh)
+                        
                     }
                 }
             }
@@ -186,11 +205,16 @@ export class GeoLayer{
         }
 
         this.layer.Add(this.layer_objects.Layer())
-        if(options.merged && options.collider) this.layer.Add(this.layer_colliders.Layer()) // Invisiable collider
+
+        // Add collider
+        if(options.collider){
+            //this.layer.Add(this.layer_colliders.Layer()) // Helper debug
+            this.layer.Layer().CUBE_COLLIDER.colliders = this.layer_colliders.Layer()
+            this.layer.Layer().CUBE_COLLIDER.enabled = true
+        }
+
         return this.layer.Layer()
     }
-
-    
 
     /**
      * Line merged, high preformance
@@ -471,12 +495,12 @@ function addBuilding(coordinates, collider=false, info={}, height=1, terrain) {
         shape.holes.push(holes[i])
     }
 
-    
     geometry = GenGeometry(shape, {curveSegments: 1, depth: 0.1 * height, bevelEnabled: false})
     geometry.rotateX(Math.PI / 2)
     geometry.rotateZ(Math.PI)
+    geometry.computeBoundingSphere()
 
-    // if has terrain data then adjust altitude
+    // adjust altitude if has terrain data
     if(terrain){
         let vector = new THREE.Vector3( shape.currentPoint.x, 0, shape.currentPoint.y )
         let axis = new THREE.Vector3( 0, 0, 1 )
@@ -491,11 +515,11 @@ function addBuilding(coordinates, collider=false, info={}, height=1, terrain) {
     if(collider){
         helper = GenHelper(geometry)
         if(helper){
-            helper.name = info["name"] ? info["name"] : "Building"
+            let n = verify(info, "name")
+            helper.name = n ? n : "building"
             helper.info = info
         }
     }
-    
 
     return {
         geometry: geometry, 
@@ -531,17 +555,19 @@ function addProvince(coordinates, info, collider=false, height=1){
         // Adjust geometry rotation
         geometry.rotateX(Math.PI / 2)
         geometry.rotateZ(Math.PI)
+        geometry.computeBoundingSphere()
 
         // Generate invisible helper if needed
         let helper = {}
         if(collider){
             helper = GenHelper(geometry)
             if(helper){
-                helper.name = info["name"] ? info["name"] : "Building"
+                let n = verify(info, "name")
+                helper.name = n ? n : "Area"
+                
                 helper.info = info
             }
         }
-        
 
         return {geometry: geometry, helper: helper}
     }
@@ -706,6 +732,7 @@ function addWater(d){
     // Adjust geometry rotation
     geometry.rotateX(Math.PI / 2)
     geometry.rotateZ(Math.PI)
+    geometry.computeBoundingSphere()
 
     return {geometry: geometry}
 }

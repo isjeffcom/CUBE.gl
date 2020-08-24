@@ -2,10 +2,10 @@
   "name": "cube.gl",
   "version": "1.0.15",
   "description": "CUBE.gl core. A WebGL-powered geographic data visualization framework build upon three.js.",
-  "main": "dist/cube.js",
+  "main": "dist/cubegl.js",
   "scripts": {
-    "build": "parcel build ./src/index.js -o cube.js",
-    "dev": "parcel ./serve/index.html"
+    "build": "parcel build ./src/index.js -o cubegl.js",
+    "dev": "parcel ./playground/*.html -p 8089 -d tmp --no-hmr"
   },
   "dependencies": {
     "@tweenjs/tween.js": "^18.6.0",
@@ -18,8 +18,8 @@
     "url": "git+https://github.com/isjeffcom/CUBE.gl.git"
   },
   "files": [
-    "dist/cube.js",
-    "dist/cube.js.map"
+    "dist/cubegl.js",
+    "dist/cubegl.js.map"
   ],
   "keywords": [
     "CUBE.gl",
@@ -45,7 +45,8 @@
     "@babel/core": "^7.11.1",
     "@babel/preset-react": "^7.10.4",
     "cross-env": "^7.0.2",
-    "parcel-bundler": "^1.12.4"
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-static-files-copy": "^2.5.0"
   },
   "browserslist": [
     "defaults",
