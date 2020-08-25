@@ -62,7 +62,7 @@ export class Action{
 
     FlyTo(posi, duration){
         // Set control target
-        this.ins.controls.target = null
+        this.ins.controls.target = posi.clone()
 
         // ANIMATION
         // Set duration
