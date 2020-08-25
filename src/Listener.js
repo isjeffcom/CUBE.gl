@@ -27,6 +27,9 @@ export class Listener{
     }
 
     Init(){
+        
+        // Need enable interaction
+        if(!this.options.enable) return
 
         if(this.options.select){
 

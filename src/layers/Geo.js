@@ -152,8 +152,8 @@ export class GeoLayer{
         let geometries = []
 
         // if merge is false, force collider to false
-        options.collider = options.merge ? options.collider : false
-
+        if(!options.collider) options.collider = false
+        else options.collider = options.merge ? options.collider : false
         // Render all building
         for(let i=0;i<features.length;i++){
 
@@ -183,7 +183,6 @@ export class GeoLayer{
                 if(building){
                     if(options.merge){
                         geometries.push(building.geometry)
-                        building.helper.updateMatrixWorld()
                         if(options.collider) this.layer_colliders.Add(building.helper) // Invisiable collider
                     } else {
                         let mesh = new THREE.Mesh(building.geometry, this.mat_building)

@@ -100,6 +100,7 @@ export function DefaultConfig(){
         "far": 150
     },
     "interaction": {
+      enable: false,
       select: false,
       hover: false
     },
