@@ -193,6 +193,7 @@ export class Space {
         let group = this.Find(name)
         for(let i=0;i<group.children.length;i++){
             let mesh = group.children[i]
+            // 这里可能有问题，可能需要递归删
             this.Delete(mesh, group)
         }
         this.scene.remove(group)
