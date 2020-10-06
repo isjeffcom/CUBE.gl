@@ -1,3 +1,12 @@
+/**
+ * CUBE.GL
+ * Layer: Geographical layer like buildings, roads
+ * Jeff Wu
+ * https://cubegl.org/
+ * https://github.com/isjeffcom/CUBE.gl
+ * 2020.10.07
+*/
+
 import * as THREE from 'three'
 import { Coordinate } from '../coordinate/Coordinate'
 import {GenShape, GenGeometry, GenHelper, MergeGeometry, GenWaterGeometry } from '../utils/ModelBuilder'

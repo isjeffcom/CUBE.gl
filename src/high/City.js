@@ -1,14 +1,22 @@
+/**
+ * CUBE.GL
+ * High-level API: download data from APIs and generate elements
+ * jeffwu
+ * https://cubegl.org/
+ * https://github.com/isjeffcom/CUBE.gl
+ * 2020.10.07
+*/
+
 // High level map api, loading 3d visualisation like using a map
 // Rely on third party APIs, it is possible not working stablely. 
 
-import * as THREE from 'three'
-import { Layer } from './Layer'
+//import * as THREE from 'three'
 import { MakeBBox } from '../utils/geotools/GeoCalculator'
+import osmtogeojson from 'osmtogeojson'
 
-const API_BUILDING = "http://overpass-api.de/api/interpreter"
-const API_WATER = API_BUILDING
-const API_ROADS = API_BUILDING
+const API_MAP = "http://overpass-api.de/api/interpreter"
 const API_TERRAIN = "https://portal.opentopography.org/API/globaldem"
+
 
 
 export class City {
@@ -16,27 +24,16 @@ export class City {
     /**
      * Init generate a part of the city by center and range
      * @param {String} name name of the layer
-     * @param {Number} range minimal range of a city in meter
-     * @param {String} mode static or map, static only generate once, map will constantly generate city by ux
-     * @param {String} options.API_BUILDING allow user replace remote building data api address
-     * @param {String} options.API_WATER allow user replace remote water data api address
-     * @param {String} options.API_ROADS allow user replace remote roads data api address
+     * @param {Number} range minimal range of a city in meter, default is 1000
+     * @param {String} options.API_MAP allow user replace remote building/water/roads data api address
      * @param {String} options.API_TERRAIN allow user replace remote terrain data api address
     */
 
-    constructor(name, range=100, mode="static", options={}) {
+    constructor(range=1000, options={}) {
 
         // Allow replace api
-        this.API_BUILDING = options.API_BUILDING ? options.API_BUILDING : API_BUILDING
-        this.API_WATER = options.API_WATER ? options.API_WATER : API_WATER
-        this.API_ROADS = options.API_ROADS ? options.API_ROADS : API_ROADS
+        this.API_MAP = options.API_MAP ? options.API_MAP : API_MAP
         this.API_TERRAIN = options.API_TERRAIN ? options.API_TERRAIN : API_TERRAIN
-
-        // Set mode
-        this.mode = mode
-
-        // Main Layer
-        this.layer = new Layer(name)
         
         // Get center from global CUBE instance paramter
         this.center = window.CUBE_GLOBAL.CENTER
@@ -44,22 +41,129 @@ export class City {
         // Define Initial Range, default is 10
         this.range = range
 
-        // Mange tiles 
-        this.tiles_building = []
-
         // Calculate bounding box
-        this.init_bbox = MakeBBox(this.center, this.range)
+        this.bbox = MakeBBox(this.center, this.range)
         
     }
 
-    create(){
-        
+    /**
+     * Generate buildings
+     * @param {String} name name of the layer
+     * @param {Object} options replace building geo layer options, check GeoLayer for more info
+     * @param {THREE.Material} material replace building material, check GeoLayer for more info
+    */
+    async buildings(name="building", options={merge: true, color: 0xE5E5E5}, material){
+
+        // construct query string
+        let queryURL = constOverpassQL(this.API_MAP, "building", this.bbox)
+
+        // request json
+        let json = await (await fetch(queryURL)).json()
+
+        // convert to geojson
+        let geojson = osmtogeojson(json)
+
+        // return layer
+        return new CUBE.GeoLayer(name, geojson).Buildings(options, material || undefined)
     }
 
-    building(bbox){
-        const nyc_building = await (await fetch('<url>/buildings.geojson')).json()
-        const buildings = new CUBE.GeoLayer("name", nyc_building).Buildings({merge: true, color: 0xE5E5E5})
-        this.tiles_building.push(buildings)
+    /**
+     * Generate roads
+     * @param {String} name name of the layer
+     * @param {Object} options replace roads geo layer options, check GeoLayer for more info
+     * @param {THREE.Material} material replace roads material, check GeoLayer for more info
+    */
+
+    async roads(name="roads", options, material){
+
+        // construct query string
+        let queryURL = constOverpassQL(this.API_MAP, "highway", this.bbox)
+
+        // request json
+        let json = await (await fetch(queryURL)).json()
+
+        // convert to geojson
+        let geojson = osmtogeojson(json)
+        
+        // return layer
+        return new CUBE.GeoLayer(name, geojson).Road(options || undefined, material || undefined)
     }
 
 }
+
+
+/**
+ * Constucture overpass ql query url
+ * @param {String} baseAPI basic overpass api
+ * @param {String} type query type, support building, highway(==road) and water
+ * @param {Number} bbox.south bounding box south
+ * @param {Number} bbox.north bounding box north
+ * @param {Number} bbox.east bounding box east
+ * @param {Number} bbox.west bounding box west
+ * @param {String} [output] output type, default is json
+ * @param {Number} [timeout] query timeout, default is 30 seconds
+ * @private
+*/
+function constOverpassQL(baseAPI, type, bbox, output="json", timeout=30){
+
+    // overpass query string first line
+    let query = `[out:${output}][timeout:${timeout}];`
+
+    // Ready to add Bounding Box into overpass query string
+    let b = `(${bbox.south}, ${bbox.west}, ${bbox.north}, ${bbox.east})`
+
+    // construct overpass query string by type
+    if(type === "building"){
+        //query += `(way["building"]${b};relation["building"]["type"="multipolygon"]{b};);`
+        query += `(way["building"]${b};` +
+                  `relation["building"]["type"="multipolygon"]${b};` +
+                  `);`
+    }
+
+    if(type === "highway"){
+        query += `(way["highway"]${b};` +
+                 `);`
+    }
+
+    if(type === "water"){
+        query += `(way["natural"="water"]${b};` +
+                 `relation["natural"="water"]${b};` +
+                 `way["waterway"]${b};` +
+                 `);`
+    }
+    
+    query += 'out;>;out qt;'
+
+    // encode and return whole url
+    return baseAPI + '?data=' + encodeURI(query)
+}
+
+
+// From Python
+
+// def constOverpassQL(api, output, timeout, query_type, bbox):
+//     if not query_type:
+//         return False
+
+//     query = f'[out:{output}][timeout:{timeout}];'
+
+//     b = f'({bbox["south"]}, {bbox["west"]}, {bbox["north"]}, {bbox["east"]})'
+//     if query_type == 'building':
+//         query += f'(way["building"]{b};' \
+//                  f'relation["building"]["type"="multipolygon"]{b};' \
+//                  ');'
+
+//     if query_type == 'highway':
+//         query += f'(way["highway"]{b};' \
+//                  ');'
+
+//     if query_type == 'water':
+//         query += f'(way["natural"="water"]{b};' \
+//                  f'relation["natural"="water"]{b};' \
+//                  f'way["waterway"]{b};' \
+//                  ');'
+
+//     query += 'out;>;out qt;'
+//     # print(query)
+//     return BASE_OVERPASS + '?data=' + quote(query, 'utf-8')
+//     # return quote(query, 'utf-8')

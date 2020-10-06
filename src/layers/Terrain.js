@@ -1,3 +1,12 @@
+/**
+ * CUBE.GL
+ * Layer: Terrain layer
+ * Jeff Wu
+ * https://cubegl.org/
+ * https://github.com/isjeffcom/CUBE.gl
+ * 2020.10.07
+*/
+
 import * as GeoTIFF from "../utils/third/geotiff"
 import * as THREE from 'three'
 import { Coordinate } from '../coordinate/Coordinate'

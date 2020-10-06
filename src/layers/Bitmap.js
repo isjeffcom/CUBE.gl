@@ -1,3 +1,12 @@
+/**
+ * CUBE.GL
+ * Layer: Bitmap layer, loading map, often as ground, require third party API
+ * Jeff Wu
+ * https://cubegl.org/
+ * https://github.com/isjeffcom/CUBE.gl
+ * 2020.10.07
+*/
+
 import * as THREE from 'three'
 import deepmerge from 'deepmerge'
 import { Coordinate } from '../coordinate/Coordinate'

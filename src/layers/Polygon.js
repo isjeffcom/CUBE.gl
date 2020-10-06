@@ -1,3 +1,12 @@
+/**
+ * CUBE.GL
+ * Layer: Polygon layer
+ * Jeff Wu
+ * https://cubegl.org/
+ * https://github.com/isjeffcom/CUBE.gl
+ * 2020.10.07
+*/
+
 import * as THREE from 'three'
 import CUBE_Material from "../materials/CUBE_Material"
 import {GenShape, GenGeometry } from '../utils/ModelBuilder'

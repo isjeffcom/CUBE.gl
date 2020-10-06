@@ -1,4 +1,13 @@
-// Import
+/**
+ * CUBE.GL
+ * Utils tools: model builder
+ * jeffwu
+ * https://cubegl.org/
+ * https://github.com/isjeffcom/CUBE.gl
+ * 2020.10.07
+*/
+
+// Imports
 import * as THREE from 'three'
 import { Coordinate } from '../coordinate/Coordinate'
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js'

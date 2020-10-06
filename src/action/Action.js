@@ -1,3 +1,12 @@
+/**
+ * CUBE.GL
+ * User interaction functions
+ * Jeff Wu
+ * https://cubegl.org/
+ * https://github.com/isjeffcom/CUBE.gl
+ * 2020.10.07
+*/
+
 import { AnimationEngine } from "../animation/AnimationEngine"
 import { Animation } from "../animation/Animation"
 import { Coordinate } from "../coordinate/Coordinate"

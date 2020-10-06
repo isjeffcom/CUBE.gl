@@ -1,5 +1,14 @@
+/**
+ * CUBE.GL
+ * Utils tools: calculate geolocation
+ * jeffwu
+ * https://cubegl.org/
+ * https://github.com/isjeffcom/CUBE.gl
+ * 2020.10.07
+*/
+
 import { WorldCoordinate } from '../../coordinate/Coordinate'
-import GEOLIB from "geolib"
+import * as GEOLIB from "geolib"
 
 let defaultScale = 50000
 
@@ -52,7 +61,12 @@ export function MakeBBox(center, dis){
         180
     )
 
-    return res
+    return {
+        south: res['south']['latitude'],
+        north: res['north']['latitude'],
+        west: res['west']['longitude'],
+        east: res['east']['longitude']
+    }
 }
 
 /**

@@ -1,10 +1,12 @@
 /**
  * CUBE.gl
  * Web Front-end GIS-Based 3D Data Visualisation Library
- * by Jeff Wu
+ * Jeff Wu
+ * https://cubegl.org/
+ * https://github.com/isjeffcom/CUBE.gl
  * 2020.05
  * MIT Lisence
- */
+*/
 
 // Basic
 export { Space } from './Space'
@@ -33,3 +35,6 @@ export { ShaderEngine } from './shader/ShaderEngine'
 
 // Coordination
 export { Coordinate } from './coordinate/Coordinate'
+
+// High level API
+export { City } from './high/City'

@@ -8,7 +8,9 @@ const defaultOptions = {
 export class Listener{
     /**
      * Listener for interaction
-     * @param {DOM Object} container render target
+     * @param {DOMObject} container render target
+     * @param {Boolean} options.enable if enable interaction
+     * @param {Boolean} options.select if enable select
      * @public
     */
 

@@ -1,3 +1,13 @@
+/**
+ * CUBE.GL
+ * Main instance: manage scene and space
+ * Jeff Wu
+ * https://cubegl.org/
+ * https://github.com/isjeffcom/CUBE.gl
+ * 2020.10.07
+*/
+
+
 import * as THREE from 'three'
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { DefaultConfig } from './static/Config.js'
@@ -31,7 +41,13 @@ export class Space {
         this.three = THREE
         this.container = container
 
-        // Update Global Config, center and scale is essential
+        // center and scale is essential
+        if(!opt.center || !opt.scale) {
+            console.error("Center and scale is essential")
+            return
+        }
+
+        // Update center and scale to Global Config, center and scale is essential
         window.CUBE_GLOBAL.CENTER = opt.center ? Clone(opt.center) : window.CUBE_GLOBAL.CENTER
         window.CUBE_GLOBAL.MAP_SCALE = opt.scale ? opt.scale : window.CUBE_GLOBAL.MAP_SCALE
 
