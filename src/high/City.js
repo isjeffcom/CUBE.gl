@@ -23,10 +23,9 @@ export class City {
 
     /**
      * Init generate a part of the city by center and range
-     * @param {String} name name of the layer
-     * @param {Number} range minimal range of a city in meter, default is 1000
-     * @param {String} options.API_MAP allow user replace remote building/water/roads data api address
-     * @param {String} options.API_TERRAIN allow user replace remote terrain data api address
+     * @param {Number} [range] - minimal range of a city in meter, default is 1000
+     * @param {String} [options.API_MAP] - allow user replace remote building/water/roads data api address
+     * @param {String} [options.API_TERRAIN] - allow user replace remote terrain data api address
     */
 
     constructor(range=1000, options={}) {
@@ -48,11 +47,11 @@ export class City {
 
     /**
      * Generate buildings
-     * @param {String} name name of the layer
-     * @param {Object} options replace building geo layer options, check GeoLayer for more info
-     * @param {THREE.Material} material replace building material, check GeoLayer for more info
+     * @param {String} [name] - name of the layer
+     * @param {Object} [options] - to replace building geo layer options, check GeoLayer for more info
+     * @param {THREE.Material} [material] - to replace building material, check GeoLayer for more info
     */
-    async buildings(name="building", options={merge: true, color: 0xE5E5E5}, material){
+    async Buildings(name="building", options={merge: true, color: 0xE5E5E5}, material){
 
         // construct query string
         let queryURL = constOverpassQL(this.API_MAP, "building", this.bbox)
@@ -69,12 +68,12 @@ export class City {
 
     /**
      * Generate roads
-     * @param {String} name name of the layer
-     * @param {Object} options replace roads geo layer options, check GeoLayer for more info
-     * @param {THREE.Material} material replace roads material, check GeoLayer for more info
+     * @param {String} [name] - name of the layer
+     * @param {Object} [options] - replace roads geo layer options, check GeoLayer for more info
+     * @param {THREE.Material} [material] - replace roads material, check GeoLayer for more info
     */
 
-    async roads(name="roads", options, material){
+    async Roads(name="roads", options, material){
 
         // construct query string
         let queryURL = constOverpassQL(this.API_MAP, "highway", this.bbox)

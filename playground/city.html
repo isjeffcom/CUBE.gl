@@ -7,7 +7,7 @@
     <body>
 
         <div id="loading" style="position:fixed; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color:#fff; z-index:2;">
-            <div style="margin-top: 30%; transform: translateY(-70%); text-align: center;">
+            <div style="margin-top: 200px; text-align: center;">
                 Data Downloading...
             </div>
             
@@ -22,7 +22,7 @@
 
         let C
 
-        const Center = {latitude: 55.943686, longitude: -3.188822} // Edinburgh
+        const Center = {latitude: 48.851837, longitude: 2.356544} // Paris
 
         // Get Container
         const container = document.getElementById('cont')
@@ -47,8 +47,8 @@
 
             const cm = new CUBE.City(500)
             
-            const building = await cm.buildings()
-            const roads = await cm.roads()
+            const building = await cm.Buildings()
+            const roads = await cm.Roads()
 
             document.getElementById("loading").style.display = "none"
 

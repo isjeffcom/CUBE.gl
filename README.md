@@ -104,17 +104,17 @@ Run your project, you will see a green cube placed in the middle of your screen 
 
 
 
-![example-1](https://cubegl.org/assets/use/example-1.png)
+![example-1](C:/Users/wu/Documents/CUBE.gl-doc/assets/use/example-1.png)
 
 
 
-1. Now let's explore more. Add the following line **before Update()**
+3. Now let's explore more. Add the following line **before Update()**
 
 ```javascript
 // Add Geojson Map Layer
 const china = 'https://gistcdn.githack.com/isjeffcom/787220f51465c8365b4ccc7247a919e7/raw/1afd3f92f64d8dd01534b6831d65de395f07b43e/china.geojson'
 fetch(china).then(async (res)=>{
-    C.Add(new CUBE.GeoJsonLayer("china", await res.json()).AdministrativeMap({border: true, height: .5}))
+    C.Add(new CUBE.GeoLayer("china", await res.json()).AdministrativeMap({border: true, height: .5}))
 })
 
 // Add an cylinder bar at Shanghai City Center
@@ -131,7 +131,141 @@ Run your project, you will see an administrative map of China display in the cen
 
 
 
-![example-2](https://cubegl.org/assets/use/example-2.png)
+![example-2](C:/Users/wu/Documents/CUBE.gl-doc/assets/use/example-2.png)
+
+
+
+### Use High-Level API
+
+High-level API only contain City constructor for now. The City class enables the abilities to download data, and display any part of city (most of)  in 3D around the world by CUBE.gl. You can create a Paris city center (Cathédrale Notre-Dame) in range 500 meters by 
+
+
+
+```javascript
+Init()
+Update()
+
+// Get Container
+const container = document.getElementById('cont')
+
+// Ready for CUBE Instance
+let C
+
+async function Init(){
+
+    // Init CUBE Instance
+    C = new CUBE.Space(container, {
+        background: "333333", 
+        center: {latitude: 48.851837, longitude: 2.356544}, 
+        scale: 10,
+        camera:{
+            position: {x: 6, y: 10, z: 6}
+        }
+    })
+
+    const cm = new CUBE.City(500) // range 500 meters
+
+    const building = await cm.buildings()
+    const roads = await cm.roads()
+
+    document.getElementById("loading").style.display = "none"
+
+    roads.position.y -= 1
+    C.Add(building)
+    C.Add(roads)
+
+}
+
+function Update(){
+    requestAnimationFrame(Update)
+    C.Runtime()
+}
+```
+
+
+
+![paris](C:/Users/wu/Documents/CUBE.gl-doc/assets/use/paris.png)
+
+
+
+## Use with Threejs
+
+The CUBE.gl is build upon three.js. You can access the built-in three.js by CUBE.Space.three or CUBE.Space.Three(). The current CUBE build is using three.js 0.119. You can also try to implement a different version.
+
+
+
+More about three.js you can check [here](https://threejs.org)
+
+
+
+## Use with MVVM Framework
+
+The CUBE.gl has no limitation to use in any MVVM framework as long as you can access DOM element to rendering. 
+
+
+
+### Use with Vue.js
+
+Here is an example how to use CUBE.gl in Vue.js with Vue-Cli.
+
+
+
+```vue
+<template>
+    <div id="app">
+        <div id="cont"></div>
+    </div>
+</template>
+
+<script>
+
+import * as CUBE from 'cube.gl'
+
+export default {
+    name: "app",
+    data(){
+        return{
+            C: null,
+            Center: {latitude: 41.157937, longitude: -8.629108}, // Porto
+        }
+    },
+    mounted(){
+        this.Init()
+        this.Update()
+    },
+    methods: {
+        Init(){
+            let container = document.getElementById('cont')
+
+            // Init CUBE Instance
+            this.C = new CUBE.Space(container, {
+                background: "333333", 
+                center: this.Center, 
+                scale: 10
+            })
+
+            //Add a basic box with wgs84 coordinate
+            let posi = new CUBE.Coordinate("GPS", {latitude: 41.157937, longitude: -8.629108}).ComputeWorldCoordinate()
+            this.C.Add(new CUBE.Shapes("Box", posi.world).Box(1))
+
+            // Add Sphere
+            this.C.Add(new CUBE.Shapes("Sphere", {x: 2, y: 0, z: 2}).Sphere(1, 0x00ffff))
+            this.C.Add(new CUBE.Shapes("Cylinder", {x: -2, y: 0, z: -2}).Cylinder(1, 0xff0000))
+
+        },
+
+        Update(){
+            requestAnimationFrame(this.Update)
+            this.C.Runtime()
+        }
+    }
+}
+</script>
+```
+
+
+
+
 
 
 
