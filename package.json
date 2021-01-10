@@ -5,7 +5,8 @@
   "main": "dist/cubegl.js",
   "scripts": {
     "build": "parcel build ./src/index.js -o cubegl.js",
-    "dev": "parcel ./playground/*.html -p 8089 -d tmp --no-hmr"
+    "dev": "parcel ./playground/*.html -p 8089 -d tmp --no-hmr",
+    "lint": "./node_modules/.bin/eslint ./src --fix"
   },
   "dependencies": {
     "@tweenjs/tween.js": "^18.6.0",
@@ -45,7 +46,9 @@
   "devDependencies": {
     "@babel/core": "^7.11.1",
     "@babel/preset-react": "^7.10.4",
+    "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.2",
+    "eslint": "^7.17.0",
     "parcel-bundler": "^1.12.4",
     "parcel-plugin-static-files-copy": "^2.5.0"
   },

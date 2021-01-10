@@ -54,13 +54,13 @@ export class City {
     async Buildings(name="building", options={merge: true, color: 0xE5E5E5}, material){
 
         // construct query string
-        let queryURL = constOverpassQL(this.API_MAP, "building", this.bbox)
+        const queryURL = constOverpassQL(this.API_MAP, "building", this.bbox)
 
         // request json
-        let json = await (await fetch(queryURL)).json()
+        const json = await (await fetch(queryURL)).json()
 
         // convert to geojson
-        let geojson = osmtogeojson(json)
+        const geojson = osmtogeojson(json)
 
         // return layer
         return new CUBE.GeoLayer(name, geojson).Buildings(options, material || undefined)
@@ -76,13 +76,13 @@ export class City {
     async Roads(name="roads", options, material){
 
         // construct query string
-        let queryURL = constOverpassQL(this.API_MAP, "highway", this.bbox)
+        const queryURL = constOverpassQL(this.API_MAP, "highway", this.bbox)
 
         // request json
-        let json = await (await fetch(queryURL)).json()
+        const json = await (await fetch(queryURL)).json()
 
         // convert to geojson
-        let geojson = osmtogeojson(json)
+        const geojson = osmtogeojson(json)
         
         // return layer
         return new CUBE.GeoLayer(name, geojson).Road(options || undefined, material || undefined)

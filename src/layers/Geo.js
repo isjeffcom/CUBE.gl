@@ -80,12 +80,12 @@ export class GeoLayer{
         // Render all buildings
         for(let i=0;i<features.length;i++){
 
-            let fel = features[i]
+            const fel = features[i]
 
             // Just in case properties value does not exist
             if(!fel["properties"]) return
 
-            let info = fel["properties"]
+            const info = fel["properties"]
             
             // Only render when geometry is Polygon
             // Render building
@@ -103,8 +103,8 @@ export class GeoLayer{
                 
                 for(let i=0;i<coors.length;i++){
 
-                    let coor = coors[i]
-                    let province = addProvince(coor, info, options.collider, height)
+                    const coor = coors[i]
+                    const province = addProvince(coor, info, options.collider, height)
                     
                     if(province){
                         if(options.merge){
@@ -124,8 +124,8 @@ export class GeoLayer{
         
         // Merge geometry for performance
         if(options.merge){
-            let mergedGeometry = MergeGeometry(geometries)
-            let provinceMesh = new THREE.Mesh(mergedGeometry, this.mat_map)
+            const mergedGeometry = MergeGeometry(geometries)
+            const provinceMesh = new THREE.Mesh(mergedGeometry, this.mat_map)
             this.layer_objects.Add(provinceMesh)
         }
         
