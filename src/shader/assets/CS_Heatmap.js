@@ -1,6 +1,6 @@
 import PS_Shader from '../PS_Shader'
 
-let heatVertex = `
+const heatVertex = `
     uniform sampler2D heightMap;
     uniform float heightRatio;
     uniform float heightColor;
@@ -17,7 +17,7 @@ let heatVertex = `
     }
 `
 
-let heatFragment = `
+const heatFragment = `
     varying float hValue;
     varying float hColor;
 
@@ -32,19 +32,16 @@ let heatFragment = `
     }
 `
 
-
-
 export default class PS_Heatmap extends PS_Shader {
-    
-    constructor(name){
-        super(name)
-    }
+  constructor (name) {
+    super(name)
+  }
 
-    GetVertex(){
-        return heatVertex
-    }
+  GetVertex () {
+    return heatVertex
+  }
 
-    GetFragment(){
-        return heatFragment
-    }
+  GetFragment () {
+    return heatFragment
+  }
 }

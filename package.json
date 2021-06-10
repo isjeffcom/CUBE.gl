@@ -6,7 +6,7 @@
   "scripts": {
     "build": "parcel build ./src/index.js -o cubegl.js",
     "dev": "parcel ./playground/*.html -p 8089 -d tmp --no-hmr",
-    "lint": "./node_modules/.bin/eslint ./src --fix"
+    "lint": "standard --fix && node ./src/index.js"
   },
   "dependencies": {
     "@tweenjs/tween.js": "^18.6.0",
@@ -57,5 +57,10 @@
     "not IE 11",
     "not IE_Mob 11",
     "maintained node versions"
-  ]
+  ],
+  "standard": {
+    "ignore": [
+      "**/dist/"
+    ]
+  }
 }
