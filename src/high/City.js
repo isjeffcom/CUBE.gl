@@ -12,7 +12,7 @@
 
 // import * as THREE from 'three'
 import { MakeBBox } from '../utils/geotools/GeoCalculator'
-import osmtogeojson from 'osmtogeojson'
+import { toGeojson } from 'osmtogeojson'
 
 const API_MAP = 'http://overpass-api.de/api/interpreter'
 const API_TERRAIN = 'https://portal.opentopography.org/API/globaldem'
@@ -54,7 +54,7 @@ export class City {
     const json = await (await fetch(queryURL)).json()
 
     // convert to geojson
-    const geojson = osmtogeojson(json)
+    const geojson = toGeojson(json)
 
     // return layer
     return new CUBE.GeoLayer(name, geojson).Buildings(options, material || undefined)
@@ -75,7 +75,7 @@ export class City {
     const json = await (await fetch(queryURL)).json()
 
     // convert to geojson
-    const geojson = osmtogeojson(json)
+    const geojson = toGeojson(json)
 
     // return layer
     return new CUBE.GeoLayer(name, geojson).Road(options || undefined, material || undefined)
@@ -104,21 +104,15 @@ function constOverpassQL (baseAPI, type, bbox, output = 'json', timeout = 30) {
   // construct overpass query string by type
   if (type === 'building') {
     // query += `(way["building"]${b};relation["building"]["type"="multipolygon"]{b};);`
-    query += `(way["building"]${b};` +
-                  `relation["building"]["type"="multipolygon"]${b};` +
-                  ');'
+    query += `(way["building"]${b}; relation["building"]["type"="multipolygon"]${b};);`;
   }
 
   if (type === 'highway') {
-    query += `(way["highway"]${b};` +
-                 ');'
+    query += `(way["highway"]${b};);`
   }
 
   if (type === 'water') {
-    query += `(way["natural"="water"]${b};` +
-                 `relation["natural"="water"]${b};` +
-                 `way["waterway"]${b};` +
-                 ');'
+    query += `(way["natural"="water"]${b};relation["natural"="water"]${b};way["waterway"]${b};);`
   }
 
   query += 'out;>;out qt;'
@@ -126,32 +120,3 @@ function constOverpassQL (baseAPI, type, bbox, output = 'json', timeout = 30) {
   // encode and return whole url
   return baseAPI + '?data=' + encodeURI(query)
 }
-
-// From Python
-
-// def constOverpassQL(api, output, timeout, query_type, bbox):
-//     if not query_type:
-//         return False
-
-//     query = f'[out:{output}][timeout:{timeout}];'
-
-//     b = f'({bbox["south"]}, {bbox["west"]}, {bbox["north"]}, {bbox["east"]})'
-//     if query_type == 'building':
-//         query += f'(way["building"]{b};' \
-//                  f'relation["building"]["type"="multipolygon"]{b};' \
-//                  ');'
-
-//     if query_type == 'highway':
-//         query += f'(way["highway"]{b};' \
-//                  ');'
-
-//     if query_type == 'water':
-//         query += f'(way["natural"="water"]{b};' \
-//                  f'relation["natural"="water"]{b};' \
-//                  f'way["waterway"]{b};' \
-//                  ');'
-
-//     query += 'out;>;out qt;'
-//     # print(query)
-//     return BASE_OVERPASS + '?data=' + quote(query, 'utf-8')
-//     # return quote(query, 'utf-8')

@@ -19,6 +19,7 @@ import { Water } from 'three/examples/jsm/objects/Water'
 import CUBE_Material from '../materials/CUBE_Material'
 import { Animation } from '../animation/Animation'
 import { Layer } from './Layer'
+import { CurvePath, LineCurve } from 'three'
 
 export class GeoLayer {
   /**
@@ -213,11 +214,13 @@ export class GeoLayer {
   /**
      * Line merged, high preformance
      * @param {Object} options {color: 0xffffff}
-     * @param {THREE.Material} mat replace building material
+     * @param {THREE.Color} options.color - 16 hex color: 0x1b4686
+     * @param {THREE.Object3D} options.terrain - Terrain Object
+     * @param {THREE.Material} mat replace road material
      * @public
     */
 
-  Road (options = {}, mat) {
+  Road (options = {color: 0x1B4686, terrain: null, width: 1 }, mat) {
     const features = this.geojson
 
     this.mat_road = new CUBE_Material().GeoRoad({ color: options.color ? options.color : 0x1B4686 })
@@ -226,11 +229,12 @@ export class GeoLayer {
     const terrain = options.terrain ? options.terrain.children[0].geometry : false
 
     let allPoints = []
+    let allCurves = [];
 
     // Replace material interface
     this.mat_road = mat || this.mat_road
 
-    // Register material
+    // Registry material
     this.materials.push(this.mat_road)
 
     for (let i = 0; i < features.length; i++) {
@@ -247,29 +251,53 @@ export class GeoLayer {
       if (tags) {
         // Render Roads
         if (fel.geometry.type === 'LineString' && tags !== 'pedestrian' && tags !== 'footway' && tags !== 'path') {
-          const road = addRoad3(fel.geometry.coordinates, terrain)
-          if (road) {
-            allPoints = allPoints.concat(road)
+          if(options.width > 1) {
+            const curves = addRoadFat(fel.geometry.coordinates, terrain)
+            allCurves.push(curves)
+          } else {
+            const road = addRoad3(fel.geometry.coordinates, terrain)
+            if (road) {
+              allPoints = allPoints.concat(road)
+            }
           }
+          
         }
       }
     }
-    const geometry = new THREE.Geometry()
-    for (let g = 0; g < allPoints.length; g++) {
-      geometry.vertices.push(allPoints[g])
+
+    // 2021.06.15 Major Updates: Geometry to Buffer Geometry. from using 'push each to geometry.vertexs' method change to setFromPoints method
+    // AND allow fat line created by TubeGeometry and CurvePath
+    let line;
+    if(options.width > 1) {
+      for(let i=0;i<allCurves.length;i++){
+        const cr = allCurves[i];
+        const geometry = new THREE.TubeGeometry(cr, 32, .12, 2, false);
+        geometry.rotateZ(Math.PI)
+        const material = new THREE.MeshBasicMaterial( { color: 0x1B4686 } );
+        const mesh = new THREE.Mesh( geometry, material );
+        mesh.rotateY(Math.PI/2);
+        // Disable matrix auto update for performance
+        mesh.matrixAutoUpdate = false
+        mesh.updateMatrix()
+        this.layer_objects.Add(mesh)
+      }
+      
+    } else {
+      const geometry = new THREE.BufferGeometry()
+      geometry.setFromPoints(allPoints)
+      geometry.rotateZ(Math.PI)
+      line = new THREE.LineSegments(geometry, this.mat_road)
+
+      // Adjust position
+      line.position.set(line.position.x, 1, line.position.z)
+
+      // Disable matrix auto update for performance
+      line.matrixAutoUpdate = false
+      line.updateMatrix()
+      this.layer_objects.Add(line)
     }
 
-    geometry.rotateZ(Math.PI)
-    const line = new THREE.LineSegments(geometry, this.mat_road)
-
-    // Adjust position
-    line.position.set(line.position.x, 1, line.position.z)
-
-    // Disable matrix auto update for performance
-    line.matrixAutoUpdate = false
-    line.updateMatrix()
-    this.layer_objects.Add(line)
-
+    
     this.layer.Add(this.layer_objects.Layer())
 
     return this.layer.Layer()
@@ -635,6 +663,54 @@ function addRoad3 (d, terrain) {
   }
 
   return points
+}
+
+function addRoadFat(d, terrain) {
+  const curves = new CurvePath();
+  let lastPoint = null;
+
+  // Loop for all nodes
+  for (let i = 0; i < d.length; i++) {
+    if (!d[0][1]) return
+
+    const el = d[i]
+
+    // Just in case
+    if (!el[0] || !el[1]) return
+
+    let elp = [el[0], el[1]]
+
+    // convert position from the center position
+    elp = new Coordinate('GPS', { latitude: elp[1], longitude: elp[0] }).ComputeWorldCoordinate()
+
+    // WAIT FOR MERGE adjust height according to terrain data
+    // Rotate
+    const vector = new THREE.Vector3(elp.world.x, elp.world.y, elp.world.z)
+    const axis = new THREE.Vector3(0, 0, 1)
+    const angle = Math.PI
+
+    vector.applyAxisAngle(axis, angle)
+
+    let y = 0
+
+    if (terrain) {
+      const dem = shortEst({ x: vector.x, z: vector.z }, terrain.vertices)
+      if (dem) {
+        y = -dem.y
+      }
+    }
+
+    // Draw Line in Pair [1,1], [1,2], [1,2], [2,5], [2,5], [3,6]
+    const thisPoint = new THREE.Vector3(elp.world.x, elp.world.y + y, elp.world.z);
+    if(lastPoint) {
+      const curve = new THREE.LineCurve3(lastPoint, thisPoint)
+      curves.add(curve)
+    }
+    lastPoint = thisPoint;
+    // if (i !== 0 && i !== d.length - 1) points.push(new THREE.Vector3(elp.world.x, elp.world.y + y, elp.world.z))
+  }
+
+  return curves
 }
 
 function addBorder (coordinates, material, up) {
