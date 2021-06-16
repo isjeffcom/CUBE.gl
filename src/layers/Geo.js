@@ -11,6 +11,10 @@ import * as THREE from 'three'
 import { Coordinate } from '../coordinate/Coordinate'
 import { GenShape, GenGeometry, GenHelper, MergeGeometry, GenWaterGeometry } from '../utils/ModelBuilder'
 import { Water } from 'three/examples/jsm/objects/Water'
+import { Line2 } from 'three/examples/jsm/lines/Line2'
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
+import { GeometryUtils } from 'three/examples/jsm/utils/GeometryUtils.js';
 
 // import { Line2 } from 'three/examples/jsm/lines/Line2.js'
 // import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
@@ -220,7 +224,7 @@ export class GeoLayer {
      * @public
     */
 
-  Road (options = {color: 0x1B4686, terrain: null, width: 1 }, mat) {
+  Road (options = {color: 0x1B4686, terrain: null, width: 2, color: 0x4287f5 }, mat) {
     const features = this.geojson
 
     this.mat_road = new CUBE_Material().GeoRoad({ color: options.color ? options.color : 0x1B4686 })
@@ -251,52 +255,61 @@ export class GeoLayer {
       if (tags) {
         // Render Roads
         if (fel.geometry.type === 'LineString' && tags !== 'pedestrian' && tags !== 'footway' && tags !== 'path') {
-          if(options.width > 1) {
-            const curves = addRoadFat(fel.geometry.coordinates, terrain)
-            allCurves.push(curves)
-          } else {
-            const road = addRoad3(fel.geometry.coordinates, terrain)
-            if (road) {
-              allPoints = allPoints.concat(road)
-            }
+          const road = addRoad3(fel.geometry.coordinates, terrain)
+          if (road) {
+            // allPoints = allPoints.concat(road)
+            allPoints.push(road);
           }
-          
         }
       }
     }
 
     // 2021.06.15 Major Updates: Geometry to Buffer Geometry. from using 'push each to geometry.vertexs' method change to setFromPoints method
     // AND allow fat line created by TubeGeometry and CurvePath
-    let line;
-    if(options.width > 1) {
-      for(let i=0;i<allCurves.length;i++){
-        const cr = allCurves[i];
-        const geometry = new THREE.TubeGeometry(cr, 32, .12, 2, false);
-        geometry.rotateZ(Math.PI)
-        const material = new THREE.MeshBasicMaterial( { color: 0x1B4686 } );
-        const mesh = new THREE.Mesh( geometry, material );
-        mesh.rotateY(Math.PI/2);
-        // Disable matrix auto update for performance
-        mesh.matrixAutoUpdate = false
-        mesh.updateMatrix()
-        this.layer_objects.Add(mesh)
+
+    // 2021.06.16 Major Updates: Use Line Geometry to support fat line for realistic highway generation
+    
+    for(let ip=0;ip<allPoints.length;ip++) {
+      const ipp = allPoints[ip]
+
+      const geometry = new LineGeometry()
+    
+      const positions = []
+      const divisions = Math.round( 24 * ipp.length )
+      const spline = new THREE.CatmullRomCurve3( ipp, false, 'catmullrom', .001 )
+      const point = new THREE.Vector3()
+
+      for(let iipp = 0, l = divisions; iipp < l; iipp ++) {
+        const t = iipp / l
+        spline.getPoint( t, point )
+        positions.push(point.x, point.y, point.z)
+        
       }
       
-    } else {
-      const geometry = new THREE.BufferGeometry()
-      geometry.setFromPoints(allPoints)
+      geometry.setPositions( positions )
       geometry.rotateZ(Math.PI)
-      line = new THREE.LineSegments(geometry, this.mat_road)
 
-      // Adjust position
-      line.position.set(line.position.x, 1, line.position.z)
+      const widthScale = window.CUBE_GLOBAL.MAP_SCALE * (options.width || 2)
 
-      // Disable matrix auto update for performance
+      const matLine = new LineMaterial( {
+
+        color: options.color || 0x4287f5,
+        linewidth: widthScale * .0001, // in pixels
+        vertexColors: false,
+        //resolution:  // to be set by renderer, eventually
+        dashed: false,
+        alphaToCoverage: true,
+  
+      } );
+  
+      const line = new Line2( geometry, matLine );
+      line.computeLineDistances()
+      // line.position.set(line.position.x, 1, line.position.z);
       line.matrixAutoUpdate = false
       line.updateMatrix()
+  
       this.layer_objects.Add(line)
     }
-
     
     this.layer.Add(this.layer_objects.Layer())
 
