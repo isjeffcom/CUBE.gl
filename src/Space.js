@@ -20,7 +20,7 @@ import { Listener } from './Listener.js'
 
 import './static/Global'
 import { Action } from './action/Action.js'
-
+import { OBJExporter } from './exporter/obj'
 
 /**
  * Create a space, main CUBE instance
@@ -458,6 +458,17 @@ export class Space {
         
         return intersects.length > 0 ? intersects[0].object : null
 
+    }
+
+    /**
+     * export three js object 3d to obj format model
+     * @param {Object3D} obj - Three js object 3d object
+     */
+    exportOBJ(obj) {
+        const exporter = new OBJExporter();
+        const result = exporter.parse(obj);
+        console.log(result);
+        return result;
     }
     
 }
