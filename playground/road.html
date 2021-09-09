@@ -1,0 +1,84 @@
+<html>
+    <head>
+        <title>CUBE.gl Building</title>
+        <link rel="icon" href="./favicon.png">
+    </head>
+
+    <body>
+        <div id="cont" style="position: absolute; width: 100%; height: 100%;"></div>
+    </body>
+
+    <script src="../src/index.js"></script>
+
+    <script>
+
+        let C
+
+        const Center = {latitude: 55.943686, longitude: -3.188822} // Edinburgh
+
+        // Get Container
+        const container = document.getElementById('cont')
+        
+        // Init Building Layer
+        let buildings
+
+        Init()
+        Update()
+
+        // container.addEventListener("cube-select", (e)=>{
+        //     let ray = C.Ray(e, buildings)
+        //     if(ray) C.Action.FocusOn(ray)
+        // })
+
+        // BOX HELPER CANNOT POPERLY DETECTED BY RAYCASTER, maybe try add invisible mesh instead of helper?
+        // container.addEventListener("cube-hover", (e)=>{
+        //     let ray = C.Ray(e, buildings)
+        //     if(ray){
+        //         ray.material.color.set(0xff0000)
+        //         buildings.children[1].children.forEach(el => {
+        //             if(el != ray) el.material.color.set(0xffff00)
+        //         })
+        //     }
+        // })
+
+        async function Init(){
+
+            // Init CUBE Instance
+            C = new CUBE.Space(container, {
+                background: "333333", 
+                center: Center, 
+                scale: 10,
+                interaction: {
+                    enable: true,
+                    select: true,
+                    hover: true
+                },
+                camera:{
+                    position: {x: 6, y: 10, z: 6}
+                }
+            })
+
+            // Load Edinburgh Buildings
+            const ed = await (await fetch('./assets/geo/project/building.geojson')).json()
+            buildings = new CUBE.GeoLayer("buildings", ed).Buildings({merge: true, collider: true})
+            C.Add(buildings)
+
+            const edRoad = await (await fetch('./assets/geo/project/highway.geojson')).json()
+            const road = new CUBE.GeoLayer("road", edRoad).Road({width: 2});
+            C.Add(road)
+        }
+
+        function Update(){
+            requestAnimationFrame(Update)
+            C.Runtime()
+        }
+    </script>
+
+
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</html>

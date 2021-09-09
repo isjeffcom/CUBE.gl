@@ -104,7 +104,7 @@ Run your project, you will see a green cube placed in the middle of your screen 
 
 
 
-![example-1](C:/Users/wu/Documents/CUBE.gl-doc/assets/use/example-1.png)
+![example-1](https://cubegl.org/assets/use/example-1.png)
 
 
 
@@ -131,7 +131,7 @@ Run your project, you will see an administrative map of China display in the cen
 
 
 
-![example-2](C:/Users/wu/Documents/CUBE.gl-doc/assets/use/example-2.png)
+![example-2](https://cubegl.org/assets/use/example-2.png)
 
 
 
@@ -184,7 +184,7 @@ function Update(){
 
 
 
-![paris](C:/Users/wu/Documents/CUBE.gl-doc/assets/use/paris.png)
+![paris](https://cubegl.org/assets/use/paris.png)
 
 
 

@@ -5,15 +5,15 @@
   "main": "dist/cubegl.js",
   "scripts": {
     "build": "parcel build ./src/index.js -o cubegl.js",
-    "dev": "parcel ./playground/*.html -p 8089 -d tmp --no-hmr",
-    "lint": "./node_modules/.bin/eslint ./src --fix"
+    "dev": "parcel ./playground/*.html -p 8081 -d tmp --no-hmr",
+    "lint": "standard --fix && node ./src/index.js"
   },
   "dependencies": {
     "@tweenjs/tween.js": "^18.6.0",
     "deepmerge": "^4.2.2",
     "geolib": "^3.3.1",
-    "osmtogeojson": "^3.0.0-beta.4",
-    "three": "^0.119.1"
+    "osmtogeojson": "^1.0.0",
+    "three": "^0.129.0"
   },
   "repository": {
     "type": "git",
@@ -49,13 +49,18 @@
     "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.2",
     "eslint": "^7.17.0",
-    "parcel-bundler": "^1.12.4",
-    "parcel-plugin-static-files-copy": "^2.5.0"
+    "parcel-bundler": "^1.12.5",
+    "parcel-plugin-static-files-copy": "^2.6.0"
   },
   "browserslist": [
     "defaults",
     "not IE 11",
     "not IE_Mob 11",
     "maintained node versions"
-  ]
+  ],
+  "standard": {
+    "ignore": [
+      "**/dist/"
+    ]
+  }
 }

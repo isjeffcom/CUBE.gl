@@ -15,14 +15,13 @@ export { Space } from './Space'
 export { Shapes } from './shapes/Shapes'
 export { Data } from './data/Data'
 export { Datasets } from './data/Datasets'
-export { Terrain }  from './layers/Terrain'
+export { Terrain } from './layers/Terrain'
 export { Model } from './model/model'
 export { Polygon } from './layers/Polygon'
 
-
 // Layers
 export { Layer } from './layers/Layer'
-export { GeoLayer } from './layers/Geo' 
+export { GeoLayer } from './layers/Geo'
 export { GeoJsonLayer } from './layers/GeoJson' // Name changed, backward compatible
 export { BitmapLayer } from './layers/Bitmap'
 

@@ -1,79 +1,76 @@
 
-
 /**
  * @class Main constructor, provides main space runtime, allow limited config, insert animation engine and shader engine
  * @param {Object} options { latitude: Number, longitude: Number, altitude: Number, x: Number, y: Number, z: Number }
  * @public
- * 
+ *
  * Notice: Be aware that the altitude is not the real altitude but the world position y-axis
 */
 
-export class Coordinate{
-    constructor(type, coor) {
-        if(type === "GPS"){
-            this.world = {}
-            this.gps = new GPSCoordinate(coor.latitude, coor.longitude, coor.altitude || 0)
-        }
-
-        if(type === "World"){
-            this.gps = {}
-            this.world = new WorldCoordinate(coor.x, coor.y, coor.z)
-        }
-
-        this.tile = {x: 0, y:0, centerOffset: {x: 0, y: 0}}
-
-        this.type = type
-
-        // Obtain Global Config
-        this.center = window.CUBE_GLOBAL.CENTER
-        this.scale = window.CUBE_GLOBAL.MAP_SCALE
+export class Coordinate {
+  constructor (type, coor) {
+    if (type === 'GPS') {
+      this.world = {}
+      this.gps = new GPSCoordinate(coor.latitude, coor.longitude, coor.altitude || 0)
     }
 
-    /**
+    if (type === 'World') {
+      this.gps = {}
+      this.world = new WorldCoordinate(coor.x, coor.y, coor.z)
+    }
+
+    this.tile = { x: 0, y: 0, centerOffset: { x: 0, y: 0 } }
+
+    this.type = type
+
+    // Obtain Global Config
+    this.center = window.CUBE_GLOBAL.CENTER
+    this.scale = window.CUBE_GLOBAL.MAP_SCALE
+  }
+
+  /**
      * Compute GPS/WGS84 Coordinate to Threejs World Postion Relatively to Center Coordinate
      * @public
     */
 
-    ComputeWorldCoordinate(){
+  ComputeWorldCoordinate () {
+    const obj = Mercator(this.gps.latitude, this.gps.longitude)
 
-        let obj = Mercator(this.gps.latitude, this.gps.longitude)
+    const center = Mercator(this.center.latitude, this.center.longitude)
+    this.world.x = (center.x - obj.x) * this.scale
+    this.world.z = (center.y - obj.y) * this.scale
+    this.world.y = this.gps.altitude
 
-        let center = Mercator(this.center.latitude, this.center.longitude)
-        this.world.x = (center.x - obj.x) * this.scale
-        this.world.z = (center.y - obj.y) * this.scale
-        this.world.y = this.gps.altitude
+    // const { MercatorX, MercatorY } = await import('../wasm/main.wasm')
+    // console.log(MercatorX(this.gps.latitude), MercatorY(this.gps.longitude))
 
-        //const { MercatorX, MercatorY } = await import('../wasm/main.wasm')
-        //console.log(MercatorX(this.gps.latitude), MercatorY(this.gps.longitude))
+    return this
+  }
 
-        return this
-    }
-
-    /**
+  /**
      * Compute GPS/WGS84 coordinate to tile map coordinate
      * @public
     */
 
-    ComputeTileCoordinate(zoom){
-        let t = GPSToTile(this.gps.latitude, this.gps.longitude, zoom)
-        this.tile.x = t.x
-        this.tile.y = t.y
-        this.tile.centerOffset.x = t.offsetX
-        this.tile.centerOffset.y = t.offsetY
+  ComputeTileCoordinate (zoom) {
+    const t = GPSToTile(this.gps.latitude, this.gps.longitude, zoom)
+    this.tile.x = t.x
+    this.tile.y = t.y
+    this.tile.centerOffset.x = t.offsetX
+    this.tile.centerOffset.y = t.offsetY
 
-        return this
-    }
+    return this
+  }
 
-    /**
+  /**
      * Reverse tile coordinate back to gps coordinate for getting the center position
      * @public
     */
 
-    ReverseTileToGPS(zoom){
-        if(!this.tile.x) return
-        return TileToGPS(this.tile.x, this.tile.y, zoom)
-    }
-
+  ReverseTileToGPS (zoom) {
+    if (!this.tile.x) return
+    return TileToGPS(this.tile.x, this.tile.y, zoom)
+  }
 }
 
 /**
@@ -83,14 +80,13 @@ export class Coordinate{
  * @private
 */
 
-class GPSCoordinate{
-    constructor(latitude, longitude, altitude) {
-        this.latitude = latitude
-        this.longitude = longitude
-        this.altitude = altitude
-    }
+class GPSCoordinate {
+  constructor (latitude, longitude, altitude) {
+    this.latitude = latitude
+    this.longitude = longitude
+    this.altitude = altitude
+  }
 }
-
 
 /**
  * @class World coordination
@@ -100,16 +96,16 @@ class GPSCoordinate{
  * @private
 */
 
-class WorldCoordinate{
-    constructor(x, y, z){
-        this.x = x
-        this.y = y
-        this.z = z
-    }
+class WorldCoordinate {
+  constructor (x, y, z) {
+    this.x = x
+    this.y = y
+    this.z = z
+  }
 
-    // computeGPSCoordinate(scale=100){
-    //     // Reserved
-    // }
+  // computeGPSCoordinate(scale=100){
+  //     // Reserved
+  // }
 }
 
 /**
@@ -121,46 +117,43 @@ class WorldCoordinate{
  * @inner
 */
 
-function Mercator(lat, lon) {
+function Mercator (lat, lon) {
+  if (window.CUBE_GLOBAL.WASM) {
+    const x = window.CUBE_GLOBAL.WASMCAL.MercatorX(lat)
+    const y = window.CUBE_GLOBAL.WASMCAL.MercatorX(lon)
+    return { x: x, y: y }
+  } else {
+    const mercator = { x: 0, y: 0 }
+    const earthRad = 6378.137
 
+    mercator.x = lon * Math.PI / 180 * earthRad
+    const a = lat * Math.PI / 180
+    mercator.y = earthRad / 2 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)))
 
-    if(window.CUBE_GLOBAL.WASM){
-        let x = window.CUBE_GLOBAL.WASMCAL.MercatorX(lat)
-        let y = window.CUBE_GLOBAL.WASMCAL.MercatorX(lon)
-        return { x: x, y: y}
-    } else {
-        let mercator = {x: 0, y: 0}
-        let earthRad = 6378.137
-
-        mercator.x = lon * Math.PI / 180 * earthRad
-        let a = lat * Math.PI / 180
-        mercator.y = earthRad / 2 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)))
-
-        return mercator
-    }
-    
+    return mercator
+  }
 }
 
 // function MercatorReverse(x, y) {
 //     // Reserved
 // }
 
-export function GPSToTile(lat, lon, zoom){
-    let x = (lon + 180) / 360 * Math.pow(2, zoom)
-    let y = (1 - Math.log( Math.tan( lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180) ) / Math.PI) / 2 * Math.pow(2,zoom)
-    return {
-        x: Math.floor(x),
-        y: Math.floor(y),
-        offsetX: Math.floor(x) - x,
-        offsetY: Math.floor(y) - y 
-    }
+export function GPSToTile (lat, lon, zoom) {
+  const x = (lon + 180) / 360 * Math.pow(2, zoom)
+  const y = (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom)
+  return {
+    x: Math.floor(x),
+    y: Math.floor(y),
+    offsetX: Math.floor(x) - x,
+    offsetY: Math.floor(y) - y
+  }
 }
 
-export function TileToGPS(x, y, zoom){
-    let n = Math.PI - 2 * Math.PI * y / Math.pow(2,zoom)
-    return{
-        latitude: (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n)))),
-        longitude: (x/Math.pow(2,zoom)*360-180),
-        altitude: 0
-    }
+export function TileToGPS (x, y, zoom) {
+  const n = Math.PI - 2 * Math.PI * y / Math.pow(2, zoom)
+  return {
+    latitude: (180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)))),
+    longitude: (x / Math.pow(2, zoom) * 360 - 180),
+    altitude: 0
+  }
 }
