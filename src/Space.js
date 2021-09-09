@@ -18,10 +18,7 @@ import { Listener } from './Listener.js'
 
 import './static/Global'
 import { Action } from './action/Action.js'
-<<<<<<< HEAD
 import { OBJExporter } from './exporter/obj'
-=======
->>>>>>> f67732f9cd190e55600d7a043bb75eed32cec87e
 
 /**
  * Create a space, main CUBE instance
