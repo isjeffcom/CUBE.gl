@@ -14,12 +14,6 @@ import { Water } from 'three/examples/jsm/objects/Water'
 import { Line2 } from 'three/examples/jsm/lines/Line2'
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
-import { GeometryUtils } from 'three/examples/jsm/utils/GeometryUtils.js';
-
-// import { Line2 } from 'three/examples/jsm/lines/Line2.js'
-// import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
-// import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
-
 import CUBE_Material from '../materials/CUBE_Material'
 import { Animation } from '../animation/Animation'
 import { Layer } from './Layer'
@@ -224,7 +218,7 @@ export class GeoLayer {
      * @public
     */
 
-  Road (options = {color: 0x1B4686, terrain: null, width: 2, color: 0x4287f5 }, mat) {
+  Road (options = {color: 0x4287f5, terrain: null, width: 12 }, mat) {
     const features = this.geojson
 
     this.mat_road = new CUBE_Material().GeoRoad({ color: options.color ? options.color : 0x1B4686 })
@@ -289,18 +283,18 @@ export class GeoLayer {
       geometry.setPositions( positions )
       geometry.rotateZ(Math.PI)
 
-      const widthScale = window.CUBE_GLOBAL.MAP_SCALE * (options.width || 2)
+      const widthScale = window.CUBE_GLOBAL.MAP_SCALE * (options.width || 12)
 
       const matLine = new LineMaterial( {
-
         color: options.color || 0x4287f5,
-        linewidth: widthScale * .0001, // in pixels
+        linewidth: widthScale * .0001, // in world units
         vertexColors: false,
-        //resolution:  // to be set by renderer, eventually
         dashed: false,
         alphaToCoverage: true,
-  
+        worldUnits: true
       } );
+      // LineMaterial requires resolution to be set (Three.js r151+)
+      matLine.resolution.set( window.innerWidth, window.innerHeight );
   
       const line = new Line2( geometry, matLine );
       line.computeLineDistances()
@@ -325,16 +319,11 @@ export class GeoLayer {
 
   RoadSp (options = {}, mat) {
     const features = this.geojson
-    this.mat_road = new CUBE_Material().GeoRoad()
 
     // Terrain
     const terrain = options.terrain ? options.terrain.children[0].geometry : false
 
-    // Replace material interface
-    this.mat_road = mat || this.mat_road
-
-    // Register material
-    this.materials.push(this.mat_road)
+    const widthScale = window.CUBE_GLOBAL.MAP_SCALE * (options.width || 12)
 
     for (let i = 0; i < features.length; i++) {
       const fel = features[i]
@@ -352,12 +341,27 @@ export class GeoLayer {
           const road = addRoad(fel.geometry.coordinates, terrain)
 
           if (road) {
-            // Add line
-            const line = new THREE.Line(road.geometry, this.mat_road)
-            line.info = info
+            // Extract positions from BufferGeometry for Line2
+            const posAttr = road.geometry.getAttribute('position')
+            const positions = []
+            for (let p = 0; p < posAttr.count; p++) {
+              positions.push(posAttr.getX(p), posAttr.getY(p), posAttr.getZ(p))
+            }
 
-            // Adjust position
-            line.position.set(line.position.x, 1, line.position.z)
+            // Create fat line using Line2 + LineMaterial (supports width)
+            const lineGeo = new LineGeometry()
+            lineGeo.setPositions(positions)
+
+            const matLine = mat || new LineMaterial({
+              color: options.color || 0x1B4686,
+              linewidth: widthScale * 0.0001,
+              worldUnits: true
+            })
+            if (matLine.resolution) matLine.resolution.set(window.innerWidth, window.innerHeight)
+
+            const line = new Line2(lineGeo, matLine)
+            line.computeLineDistances()
+            line.info = info
 
             // Disable matrix auto update for performance
             line.matrixAutoUpdate = false
@@ -365,10 +369,29 @@ export class GeoLayer {
 
             // If Animation Activated
             if (options.animation && options.animationEngine) {
-              line.computeLineDistances()
-              const lineLength = line.geometry.attributes.lineDistance.array[line.geometry.attributes.lineDistance.count - 1]
+              // Use THREE.Line + LineDashedMaterial for dash animation
+              // (LineMaterial dashing repeats uniformly, not "grow from start")
+              const aniGeo = new THREE.BufferGeometry().setFromPoints(
+                Array.from({ length: posAttr.count }, (_, p) =>
+                  new THREE.Vector3(posAttr.getX(p), posAttr.getY(p), posAttr.getZ(p))
+                )
+              )
+              const aniLine = new THREE.Line(aniGeo, new THREE.LineDashedMaterial({
+                color: options.animationColor || 0x00FFFF,
+                transparent: true,
+                dashSize: 0,
+                gapSize: 99999
+              }))
+              aniLine.computeLineDistances()
+
+              const lineDistArr = aniLine.geometry.attributes.lineDistance.array
+              const lineLength = lineDistArr[lineDistArr.length - 1]
+
               if (lineLength > 0.8) {
-                const aniLine = addAnimatedLine(line.geometry, lineLength)
+                aniLine.material.gapSize = lineLength + 10
+                aniLine.matrixAutoUpdate = false
+                aniLine.updateMatrix()
+
                 const lineAni = new Animation('l', aniLine, 'dashline').DashLine(lineLength)
                 options.animationEngine.Register(lineAni)
               }
@@ -392,7 +415,7 @@ export class GeoLayer {
     */
 
   Water (options = {}) {
-    const sun = new THREE.Light('#ffffff', 0.5)
+    const sun = new THREE.DirectionalLight('#ffffff', 2.0)
     sun.position.set(0, 4, 0)
     const matWater = new CUBE_Material().GeoWater(sun, true)
 
@@ -524,7 +547,7 @@ function addBuilding (coordinates, collider = false, info = {}, height = 1, terr
     const axis = new THREE.Vector3(0, 0, 1)
     const angle = Math.PI
     vector.applyAxisAngle(axis, angle)
-    const dem = shortEst({ x: vector.x, z: vector.z }, terrain.vertices)
+    const dem = shortEst({ x: vector.x, z: vector.z }, terrain)
     if (dem) { geometry.translate(0, dem.y, 0) }
   }
 
@@ -616,7 +639,7 @@ function addRoad (d, terrain) {
     let y = 0
 
     if (terrain) {
-      const dem = shortEst({ x: vector.x, z: vector.z }, terrain.vertices)
+      const dem = shortEst({ x: vector.x, z: vector.z }, terrain)
       if (dem) {
         y = -dem.y
       }
@@ -664,7 +687,7 @@ function addRoad3 (d, terrain) {
     let y = 0
 
     if (terrain) {
-      const dem = shortEst({ x: vector.x, z: vector.z }, terrain.vertices)
+      const dem = shortEst({ x: vector.x, z: vector.z }, terrain)
       if (dem) {
         y = -dem.y
       }
@@ -707,7 +730,7 @@ function addRoadFat(d, terrain) {
     let y = 0
 
     if (terrain) {
-      const dem = shortEst({ x: vector.x, z: vector.z }, terrain.vertices)
+      const dem = shortEst({ x: vector.x, z: vector.z }, terrain)
       if (dem) {
         y = -dem.y
       }
@@ -786,15 +809,20 @@ function addWater (d) {
   return { geometry: geometry }
 }
 
-function shortEst (target, arr) {
+function shortEst (target, geometry) {
+  // Modernized: read from BufferGeometry position attribute instead of deprecated vertices array
+  const positionAttr = geometry.getAttribute('position')
   let resDis = 100000 // Save distance
   let res = false // default return
 
-  for (let i = 0; i < arr.length; i++) { // loop all terrain data
-    const dis = Math.sqrt(Math.pow((target.x - arr[i].x), 2) + Math.pow((target.z - arr[i].z), 2)) // get distance from target distance to terrain geometry data
+  for (let i = 0; i < positionAttr.count; i++) { // loop all terrain data
+    const x = positionAttr.getX(i)
+    const y = positionAttr.getY(i)
+    const z = positionAttr.getZ(i)
+    const dis = Math.sqrt(Math.pow((target.x - x), 2) + Math.pow((target.z - z), 2)) // get distance from target distance to terrain geometry data
     if (dis <= resDis) { // if distance less than resDis
       resDis = dis // save new distance
-      res = arr[i] // save terrain geometry data
+      res = { x, y, z } // save terrain geometry data
     }
   }
 

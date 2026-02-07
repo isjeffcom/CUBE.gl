@@ -8,7 +8,7 @@
 */
 
 import * as THREE from 'three'
-import { MapControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { MapControls } from 'three/examples/jsm/controls/MapControls.js'
 import { DefaultConfig } from './static/Config.js'
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 
@@ -87,6 +87,9 @@ export class Space {
     this.renderer.shadowMap.enabled = false
     this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(window.innerWidth, window.innerHeight)
+    // Tone mapping for physically-based lighting (Three.js r155+)
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping
+    this.renderer.toneMappingExposure = 1.0
 
     // Print render result to canvas container
     this.container.appendChild(this.renderer.domElement)
@@ -342,19 +345,30 @@ export class Space {
   LoadLights (lights) {
     lights.forEach(el => {
       let light
+      const intensity = el.intensity !== undefined ? el.intensity : el.opacity
 
       if (el.type === 'Ambient') {
-        light = new THREE.AmbientLight(new THREE.Color(parseInt('0x' + el.color)), el.opacity)
+        light = new THREE.AmbientLight(new THREE.Color(parseInt('0x' + el.color)), intensity)
       } else if (el.type === 'Point') {
-        light = new THREE.PointLight(new THREE.Color(parseInt('0x' + el.color)), el.opacity)
+        light = new THREE.PointLight(new THREE.Color(parseInt('0x' + el.color)), intensity)
         light.position.set(el.position.x, el.position.y, el.position.z)
+        // Three.js r155+: decay=2 is physically correct (inverse-square falloff)
+        light.decay = el.decay !== undefined ? el.decay : 2
+        // distance=0 means no cutoff (infinite range)
+        light.distance = el.distance !== undefined ? el.distance : 0
+      } else if (el.type === 'Directional') {
+        light = new THREE.DirectionalLight(new THREE.Color(parseInt('0x' + el.color)), intensity)
+        light.position.set(el.position.x, el.position.y, el.position.z)
+      } else if (el.type === 'Hemisphere') {
+        const groundColor = el.groundColor ? new THREE.Color(parseInt('0x' + el.groundColor)) : new THREE.Color(0x444444)
+        light = new THREE.HemisphereLight(new THREE.Color(parseInt('0x' + el.color)), groundColor, intensity)
       }
 
-      light.castShadow = false
-
-      light.name = el.name
-
-      this.scene.add(light)
+      if (light) {
+        light.castShadow = el.shadow || false
+        light.name = el.name
+        this.scene.add(light)
+      }
     })
   }
 
@@ -388,8 +402,15 @@ export class Space {
     */
 
   async InitWASM () {
-    window.CUBE_GLOBAL.WASMCAL = await import('./wasm/main.wasm')
-    window.CUBE_GLOBAL.WASM = true
+    try {
+      const wasmModule = await import('./wasm/main.wasm?init')
+      const instance = await wasmModule.default()
+      window.CUBE_GLOBAL.WASMCAL = instance.exports
+      window.CUBE_GLOBAL.WASM = true
+    } catch (e) {
+      console.warn('WASM module failed to load, falling back to JS implementation:', e)
+      window.CUBE_GLOBAL.WASM = false
+    }
   }
 
   /**

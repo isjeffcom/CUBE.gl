@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <title>Proto Taxi Traffic</title>
@@ -11,9 +12,10 @@
         <div id="cont" style="position: absolute; width: 100%; height: 100%;"></div>
     </body>
 
-    <script src="../src/index.js"></script>
-    
-    <script>
+    <script type="module">
+        import * as CUBE from '../src/Main.js'
+        import '../src/static/Global.js'
+
         let C
 
         const Center = {latitude: 41.157937, longitude: -8.629108} // porto
@@ -45,11 +47,10 @@
             let buildings = new CUBE.GeoJsonLayer("city_buildings", ed).Buildings({merge: true})
             C.Add(buildings)
 
-            // // Add a ground
+            // Add a ground
             let ground = new CUBE.Terrain().Ground(800, 800, 8)
             C.Add(ground)
             ground.position.y = -2.4
-
 
             // porto Taxi
             let taxi = await fetch('./assets/porto/taxi.json')
@@ -64,7 +65,7 @@
                 let aniPath = []
                 for(let ic=0;ic<path.length;ic++){
                     let ics = path[ic]
-                    aniPath.push({latitude: ics[1], longitude: ics[0]}) // normally is 0 and 1, but it depended on data source
+                    aniPath.push({latitude: ics[1], longitude: ics[0]})
                 }
 
                 let mAni = new CUBE.Animation(single["id"], taxiSingle, "tween", {startNow: true, repeat: true}).GPSPath(aniPath, 100000)
@@ -80,7 +81,6 @@
             C.Runtime()
         }
     </script>
-
 
     <style>
         *{

@@ -5,7 +5,6 @@
     <head>
         <title>CUBE Playground</title>
         <link rel="icon" href="./favicon.png">
-        <script src="../src/index.js"></script>
     </head>
 
     <body>
@@ -13,7 +12,10 @@
     </body>
     
     
-    <script>
+    <script type="module">
+        import * as CUBE from '../src/Main.js'
+        import '../src/static/Global.js'
+
         let C
         
         const Center = {latitude: 40.760366, longitude: -73.983888} // NYC
@@ -35,8 +37,6 @@
                     if(el != ray && el.type==="Mesh") el.material.color.set(0xffff00)
                 })
             }
-            
-            //console.log(ray)
         })
 
         async function Init(){
@@ -52,7 +52,7 @@
                     select: true
                 },
                 lab:{
-                    wasm: false //9.43 9.27
+                    wasm: false
                 },
                 camera:{
                     position: {x: 5, y: 5, z: 5}
@@ -66,11 +66,6 @@
             // Add Shapes
             C.Add(new CUBE.Shapes("Sphere", {x: 2, y: 0, z: 2}).Sphere(1, 0x00ffff))
             C.Add(new CUBE.Shapes("Cylinder", {x: -2, y: 0, z: -2}).Cylinder(1, 0xff0000))
-
-            // const ed = await (await fetch('./assets/geo/project/building.geojson')).json()
-            // const buildings = new CUBE.GeoLayer("ed_buildings", ed).Buildings({merge: true})
-            // C.Add(buildings)
-            
         }
 
         function Update(){

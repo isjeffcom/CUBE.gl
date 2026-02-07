@@ -1,17 +1,18 @@
+<!DOCTYPE html>
 <html>
     <head>
-        <title>CUBE.gl Building</title>
+        <title>CUBE.gl Download</title>
         <link rel="icon" href="./favicon.png">
     </head>
 
     <body>
         <div id="cont" style="position: absolute; width: 100%; height: 100%;"></div>
-        <button id="exp-btn" style="position: fixed; top: 10px; left: 10px;" onclick="exportBuilding()">Export</button>
+        <button id="exp-btn" style="position: fixed; top: 10px; left: 10px;">Export</button>
     </body>
 
-    <script src="../src/index.js"></script>
-
-    <script>
+    <script type="module">
+        import * as CUBE from '../src/Main.js'
+        import '../src/static/Global.js'
 
         let C
 
@@ -29,6 +30,11 @@
         container.addEventListener("cube-select", (e)=>{
             let ray = C.Ray(e, buildings)
             if(ray) C.Action.FocusOn(ray)
+        })
+
+        // Export button handler
+        document.getElementById('exp-btn').addEventListener('click', () => {
+            exportBuilding()
         })
 
         async function Init(){
@@ -52,15 +58,11 @@
             const ed = await (await fetch('./assets/geo/project/building.geojson')).json()
             buildings = new CUBE.GeoLayer("buildings", ed).Buildings({merge: true, collider: true})
             C.Add(buildings)
-
-            // Dis disable export button
-            //document.getElementById('exp-btn').setAttribute('disabled', true);
-            
         }
 
         function exportBuilding() {
             const objTextRaw = C.exportOBJ(buildings);
-             // To blob
+            // To blob
             const blob = new Blob([objTextRaw], { type: 'model/obj' });
             const url  = window.URL.createObjectURL(blob);
 
@@ -79,7 +81,6 @@
             C.Runtime()
         }
     </script>
-
 
     <style>
         *{

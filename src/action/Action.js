@@ -7,6 +7,7 @@
  * 2020.10.07
 */
 
+import TWEEN from '@tweenjs/tween.js'
 import { AnimationEngine } from '../animation/AnimationEngine'
 import { Animation } from '../animation/Animation'
 import { Coordinate } from '../coordinate/Coordinate'
@@ -67,21 +68,29 @@ export class Action {
     */
 
   FlyTo (posi, duration) {
-    // Set control target
-    this.ins.controls.target = posi.clone()
-
-    // ANIMATION
-    // Set duration
     const time = duration || 800
 
-    // Set destination
+    // Camera destination: offset from target position, keep current height
     const dest = posi.clone()
     dest.x = dest.x + (0.5 * this.ins.scale)
     dest.y = this.ins.camera.position.y
     dest.z = dest.z + (0.5 * this.ins.scale)
 
-    // Set and play animation
-    const ani = new Animation('_moveTo', this.ins.camera).MoveTo(dest, time)
-    this.ins.AniEngine.Register(ani)
+    // Smoothly animate camera position
+    const cameraAni = new Animation('_flyto_camera', this.ins.camera).MoveTo(dest, time)
+    this.ins.AniEngine.Register(cameraAni)
+
+    // Smoothly animate controls target in sync (avoids pitch jerk)
+    const startTarget = this.ins.controls.target.clone()
+    const endTarget = posi.clone()
+    const controls = this.ins.controls
+
+    new TWEEN.Tween(startTarget)
+      .to({ x: endTarget.x, y: endTarget.y, z: endTarget.z }, time)
+      .easing(TWEEN.Easing.Quadratic.Out)
+      .onUpdate(() => {
+        controls.target.set(startTarget.x, startTarget.y, startTarget.z)
+      })
+      .start()
   }
 }

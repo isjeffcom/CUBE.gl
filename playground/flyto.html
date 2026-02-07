@@ -1,19 +1,19 @@
+<!DOCTYPE html>
 <html>
     <head>
-        <title>CUBE.gl Building</title>
+        <title>CUBE.gl FlyTo</title>
         <link rel="icon" href="./favicon.png">
     </head>
 
     <body>
-        <button onclick="flyto({latitude: 55.948554, longitude: -3.200126})">Fly To 55.948554, -3.200126</button>
-        <button onclick="flyto({latitude: 55.943686, longitude: -3.188822})">Fly To 55.943686, -3.188822</button>
+        <button id="btn-fly1">Fly To 55.948554, -3.200126</button>
+        <button id="btn-fly2">Fly To 55.943686, -3.188822</button>
         <div id="cont" style="position: absolute; width: 100%; height: 100%;"></div>
-        
     </body>
 
-    <script src="../src/index.js"></script>
-
-    <script>
+    <script type="module">
+        import * as CUBE from '../src/Main.js'
+        import '../src/static/Global.js'
 
         let C
 
@@ -28,6 +28,13 @@
         Init()
         Update()
 
+        // Attach button handlers (module scope doesn't expose to global)
+        document.getElementById('btn-fly1').addEventListener('click', () => {
+            flyto({latitude: 55.948554, longitude: -3.200126})
+        })
+        document.getElementById('btn-fly2').addEventListener('click', () => {
+            flyto({latitude: 55.943686, longitude: -3.188822})
+        })
 
         async function Init(){
 
@@ -62,7 +69,6 @@
             C.Runtime()
         }
     </script>
-
 
     <style>
         *{

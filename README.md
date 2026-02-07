@@ -29,6 +29,10 @@ CUBE.gl is a geospatial data visualization framework for visualizing large-scale
 
 -  Attach shader to an object to create visual effects.
 
+## TypeScript Support
+
+CUBE.gl ships with built-in TypeScript declaration files. You get full IntelliSense, hover documentation, and auto-completion in editors like VS Code and Cursor — no extra setup required.
+
 ## Install
 
 

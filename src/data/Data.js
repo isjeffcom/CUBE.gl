@@ -1,5 +1,6 @@
 
 import * as THREE from 'three'
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import { getCenter } from 'geolib'
 import { Coordinate } from '../coordinate/Coordinate'
 import CUBE_Material from '../materials/CUBE_Material'
@@ -37,7 +38,7 @@ export default class Data {
   Sphere (coordinate, value = 1, size = 2, yOffset = 0, color = 0xff6600, mat) {
     const localCoor = new Coordinate('GPS', coordinate).ComputeWorldCoordinate()
 
-    const geometry = new THREE.SphereBufferGeometry(size * 3, value * size, value * size)
+    const geometry = new THREE.SphereGeometry(size * 3, value * size, value * size)
     const material = mat || new THREE.MeshBasicMaterial({ color: color })
     const sphere = new THREE.Mesh(geometry, material)
 
@@ -65,13 +66,13 @@ export default class Data {
 
     const localCoor = new Coordinate('GPS', coordinate).ComputeWorldCoordinate()
 
-    const geometry = new THREE.BoxBufferGeometry(size, size, height, this._SEGMENTS) // top, bottom, height, segments
+    const geometry = new THREE.BoxGeometry(size, size, height, this._SEGMENTS) // top, bottom, height, segments
 
     const material = mat || new THREE.MeshPhongMaterial({ color: color })
     const bar = new THREE.Mesh(geometry, material)
 
     // Rotate around X 90deg
-    bar.rotateOnAxis(axisX, THREE.Math.degToRad(90))
+    bar.rotateOnAxis(axisX, THREE.MathUtils.degToRad(90))
 
     const y = localCoor.world.y + yOffset
     bar.position.set(-localCoor.world.x, y + ((height / 2)), localCoor.world.z)
@@ -100,7 +101,7 @@ export default class Data {
 
     const localCoor = new Coordinate('GPS', coordinate).ComputeWorldCoordinate()
 
-    const geometry = new THREE.CylinderBufferGeometry(size, size, height, this._SEGMENTS) // top, bottom, height, segments
+    const geometry = new THREE.CylinderGeometry(size, size, height, this._SEGMENTS) // top, bottom, height, segments
 
     const material = mat || new THREE.MeshPhongMaterial({ color: color })
     const cylinder = new THREE.Mesh(geometry, material)
@@ -130,25 +131,41 @@ export default class Data {
     height = height * this._SCALE
     const localA = new Coordinate('GPS', coorA).ComputeWorldCoordinate()
     const localB = new Coordinate('GPS', coorB).ComputeWorldCoordinate()
-    const localCenter = new Coordinate('GPS', getCenter([coorA, coorB])).ComputeWorldCoordinate()
 
-    const arcLine = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-localA.world.x, localA.world.y + yOffset, localA.world.z),
-      new THREE.Vector3(-localCenter.world.x, height + yOffset, localCenter.world.z),
-      new THREE.Vector3(-localB.world.x, localA.world.y + yOffset, localB.world.z)
-    ], false, 'catmullrom')
+    const startPoint = new THREE.Vector3(-localA.world.x, localA.world.y + yOffset, localA.world.z)
+    const endPoint = new THREE.Vector3(-localB.world.x, localB.world.y + yOffset, localB.world.z)
 
-    const points = arcLine.getPoints(50)
+    // Midpoint between start and end
+    const mid = new THREE.Vector3().addVectors(startPoint, endPoint).multiplyScalar(0.5)
+
+    // Horizontal direction from start to end
+    const dir = new THREE.Vector3().subVectors(endPoint, startPoint)
+    const halfDist = dir.length() / 2
+    dir.normalize()
+
+    // Vertical direction
+    const up = new THREE.Vector3(0, 1, 0)
+
+    // Generate semicircular arc points using parametric equation
+    // When height === halfDist, it's a perfect semicircle
+    // Otherwise it's a semi-elliptical arc
+    const segments = 64
+    const points = []
+    for (let i = 0; i <= segments; i++) {
+      const t = Math.PI * i / segments // 0 → π
+      const point = new THREE.Vector3()
+      point.copy(mid)
+      point.addScaledVector(dir, -Math.cos(t) * halfDist) // horizontal: start → end
+      point.addScaledVector(up, Math.sin(t) * height) // vertical: 0 → height → 0
+      points.push(point)
+    }
+
     const geometry = new THREE.BufferGeometry().setFromPoints(points)
     geometry.computeBoundingSphere()
-    geometry.boundingSphere.center = new THREE.Vector3(localCenter.world.x, 0, localCenter.world.z)
 
     const material = mat || new THREE.LineBasicMaterial({ color: color, linewidth: 1 })
     const arc = new THREE.Line(geometry, material)
     arc.name = this.name
-
-    // Rotate around X 90deg 绕X轴旋转90度
-    // arc.rotateOnAxis(axisY, THREE.Math.degToRad(90))
 
     return arc
   }
@@ -170,11 +187,11 @@ export default class Data {
 
     const localCoor = new Coordinate('GPS', coordinate).ComputeWorldCoordinate()
 
-    const geometry = new THREE.TextBufferGeometry(text, {
+    const geometry = new TextGeometry(text, {
       font: font,
       size: size,
-      height: thickness,
-      curveSegments: parseInt(size / 6)
+      depth: thickness,
+      curveSegments: Math.max(3, Math.round(size / 6))
     })
 
     geometry.center()

@@ -1,27 +1,41 @@
 {
   "name": "cube.gl",
-  "version": "1.0.18",
+  "version": "2.0.6",
   "description": "CUBE.gl core. A WebGL-powered geographic data visualization framework build upon three.js.",
-  "main": "dist/cubegl.js",
+  "main": "./dist/cubegl.umd.js",
+  "module": "./dist/cubegl.es.js",
+  "type": "module",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./dist/cubegl.es.js",
+      "require": "./dist/cubegl.umd.js",
+      "default": "./dist/cubegl.umd.js"
+    }
+  },
   "scripts": {
-    "build": "parcel build ./src/index.js -o cubegl.js",
-    "dev": "parcel ./playground/*.html -p 8081 -d tmp --no-hmr",
-    "lint": "standard --fix && node ./src/index.js"
+    "build": "vite build",
+    "dev": "vite --open /playground/index.html",
+    "preview": "vite preview",
+    "lint": "eslint src/"
   },
   "dependencies": {
-    "@tweenjs/tween.js": "^18.6.0",
-    "deepmerge": "^4.2.2",
-    "geolib": "^3.3.1",
-    "osmtogeojson": "^1.0.0",
-    "three": "^0.129.0"
+    "@tweenjs/tween.js": "^23.1.3",
+    "deepmerge": "^4.3.1",
+    "geolib": "^3.3.4",
+    "geotiff": "^3.0.0",
+    "osmtogeojson": "^3.0.0-beta.5",
+    "three": "^0.170.0"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/isjeffcom/CUBE.gl.git"
   },
   "files": [
-    "dist/cubegl.js",
-    "dist/cubegl.js.map"
+    "dist/*.js",
+    "dist/*.js.map",
+    "types/"
   ],
   "keywords": [
     "CUBE.gl",
@@ -33,7 +47,6 @@
     "webgl",
     "visualization",
     "geographic",
-    "gis",
     "layer",
     "three"
   ],
@@ -44,18 +57,13 @@
   },
   "homepage": "https://github.com/isjeffcom/CUBE.gl#readme",
   "devDependencies": {
-    "@babel/core": "^7.11.1",
-    "@babel/preset-react": "^7.10.4",
-    "babel-eslint": "^10.1.0",
-    "cross-env": "^7.0.2",
-    "eslint": "^7.17.0",
-    "parcel-bundler": "^1.12.5",
-    "parcel-plugin-static-files-copy": "^2.6.0"
+    "eslint": "^9.0.0",
+    "vite": "^6.1.0"
   },
   "browserslist": [
     "defaults",
-    "not IE 11",
-    "not IE_Mob 11",
+    "not dead",
+    "not op_mini all",
     "maintained node versions"
   ],
   "standard": {

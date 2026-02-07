@@ -10,7 +10,7 @@
 // Imports
 import * as THREE from 'three'
 import { Coordinate } from '../coordinate/Coordinate'
-import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
 export function GenBuilding (coordinates, height) {
   // // Create Shape
@@ -31,7 +31,7 @@ export function GenBuilding (coordinates, height) {
 
 // Render building by geojson->geometry->coordinates points data, a set 2-d array
 export function GenGeometry (shape, extrudeSettings) {
-  const geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings)
+  const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
   geometry.computeBoundingBox()
 
   return geometry
@@ -109,7 +109,7 @@ export function GenLinePoints (data) {
 }
 
 export function GenWaterGeometry (shape, config) {
-  const geometry = new THREE.ExtrudeBufferGeometry(shape, config)
+  const geometry = new THREE.ExtrudeGeometry(shape, config)
   geometry.computeBoundingBox()
 
   return geometry
@@ -117,7 +117,7 @@ export function GenWaterGeometry (shape, config) {
 }
 
 export function MergeGeometry (geometries) {
-  return BufferGeometryUtils.mergeBufferGeometries(geometries)
+  return BufferGeometryUtils.mergeGeometries(geometries)
 }
 
 export function MergeLineGeometry (geometries) {

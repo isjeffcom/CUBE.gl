@@ -7,7 +7,7 @@
  * 2020.10.07
 */
 
-import * as GeoTIFF from '../utils/third/geotiff'
+import * as GeoTIFF from 'geotiff'
 import * as THREE from 'three'
 import { Coordinate } from '../coordinate/Coordinate'
 import CUBE_Material from '../materials/CUBE_Material'
@@ -35,7 +35,7 @@ export class Terrain {
     */
 
   Ground (sizeX = 20, sizeY = 20, segments = 32) {
-    const geometry = new THREE.PlaneBufferGeometry(sizeX, sizeY, segments)
+    const geometry = new THREE.PlaneGeometry(sizeX, sizeY, segments)
     geometry.rotateX(Math.PI / 2)
     geometry.rotateZ(Math.PI)
     const ground = new THREE.Mesh(geometry, new CUBE_Material().Ground())
@@ -52,11 +52,11 @@ export class Terrain {
     */
 
   WaterGround (sizeX = 20, sizeY = 20, segments = 32) {
-    const sun = new THREE.Light('#ffffff', 0.5)
+    const sun = new THREE.DirectionalLight('#ffffff', 2.0)
     sun.position.set(0, 4, 0)
     const matWater = new CUBE_Material().GeoWater(sun, true)
 
-    const geometry = new THREE.PlaneBufferGeometry(sizeX, sizeY, segments)
+    const geometry = new THREE.PlaneGeometry(sizeX, sizeY, segments)
     geometry.rotateX(Math.PI / 2)
     geometry.rotateZ(Math.PI)
 
@@ -93,7 +93,7 @@ export class Terrain {
     const x = Math.abs(leftBottom.world.x - rightTop.world.x)
     const y = Math.abs(leftBottom.world.z - rightTop.world.z)
 
-    // Initial a plane geometry
+    // Initial a plane geometry (using modern BufferGeometry-based PlaneGeometry)
     const geometry = new THREE.PlaneGeometry(
       x,
       y,
@@ -104,14 +104,16 @@ export class Terrain {
     // Read image pixel values that each pixel corresponding a height
     const data = await tifImage.readRasters({ width: Math.floor(x), height: Math.floor(y), resampleMethod: 'bilinear', interleave: true })
 
-    // Fill z values of the geometry
+    // Fill z values of the geometry using BufferGeometry position attribute
+    const positionAttr = geometry.getAttribute('position')
     for (let i = 0; i < data.length; i++) {
       const el = data[i]
 
-      if (geometry.vertices[i]) {
-        geometry.vertices[i].z = (el / heightScale)
+      if (i < positionAttr.count) {
+        positionAttr.setZ(i, el / heightScale)
       }
     }
+    positionAttr.needsUpdate = true
 
     // Rotate
     geometry.rotateX(Math.PI / 2)

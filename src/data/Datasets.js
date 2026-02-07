@@ -46,9 +46,10 @@ export class Datasets extends Data {
       // Position
       const posi = new Coordinate('GPS', this.data[i].location).ComputeWorldCoordinate()
 
-      // Geometry
-      const geometry = new THREE.Geometry()
-      geometry.vertices.push(new THREE.Vector3(0, 0, 0))
+      // Geometry (migrated from deprecated THREE.Geometry to BufferGeometry)
+      const geometry = new THREE.BufferGeometry()
+      const vertices = new Float32Array([0, 0, 0])
+      geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
 
       // Point mesh
       const mesh = new THREE.Points(geometry, this.mat_point)
@@ -82,7 +83,7 @@ export class Datasets extends Data {
 
     const heightMap = HeightMap(heightMapData, size, radius)
 
-    const planeGeometry = new THREE.PlaneBufferGeometry(size, size, 1000, 1000)
+    const planeGeometry = new THREE.PlaneGeometry(size, size, 1000, 1000)
     planeGeometry.rotateX(-Math.PI / 2)
 
     const heat = new THREE.Mesh(planeGeometry, new THREE.ShaderMaterial({

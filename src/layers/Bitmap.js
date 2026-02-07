@@ -94,7 +94,7 @@ export class BitmapLayer {
 
     // Generate Geometry and attach textures
     for (let t = 0; t < textures.length; t++) {
-      const geometry = new THREE.PlaneBufferGeometry(size, size, 1, 1)
+      const geometry = new THREE.PlaneGeometry(size, size, 1, 1)
       const mat = new THREE.MeshBasicMaterial({ map: textures[t] })
       geometry.rotateX(-Math.PI / 2)
 

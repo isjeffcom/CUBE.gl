@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CUBE.gl Arc & Text Test</title>
+        <link rel="icon" href="./favicon.png">
+    </head>
+
+    <body>
+        <div id="cont" style="position: absolute; width: 100%; height: 100%;"></div>
+    </body>
+
+    <script type="module">
+        import * as CUBE from '../src/Main.js'
+        import '../src/static/Global.js'
+
+        let C
+
+        // Use NYC as center
+        const Center = {latitude: 40.760366, longitude: -73.983888}
+
+        // Get Container
+        const container = document.getElementById('cont')
+
+        Init()
+        Update()
+
+        async function Init(){
+            // Init CUBE Instance
+            C = new CUBE.Space(container, {
+                background: "222222",
+                center: Center,
+                scale: 10,
+                interaction: {
+                    enable: false
+                },
+                camera: {
+                    position: {x: 8, y: 8, z: 8}
+                }
+            })
+
+            // === Arc Tests ===
+
+            // Arc 1: Short distance semicircular arc (red)
+            const arcA1 = {latitude: 40.758896, longitude: -73.985130} // Times Square
+            const arcB1 = {latitude: 40.748817, longitude: -73.985428} // Empire State Building
+            const arc1 = new CUBE.Data("arc-short").Arc(arcA1, arcB1, 3, 0, 0xff3333)
+            C.Add(arc1)
+
+            // Arc 2: Medium distance arc (cyan)
+            const arcA2 = {latitude: 40.758896, longitude: -73.985130} // Times Square
+            const arcB2 = {latitude: 40.741895, longitude: -73.989308} // Flatiron Building
+            const arc2 = new CUBE.Data("arc-medium").Arc(arcA2, arcB2, 5, 0, 0x00ffff)
+            C.Add(arc2)
+
+            // Arc 3: Long distance arc (yellow)
+            const arcA3 = {latitude: 40.758896, longitude: -73.985130} // Times Square
+            const arcB3 = {latitude: 40.730610, longitude: -73.935242} // East Village
+            const arc3 = new CUBE.Data("arc-long").Arc(arcA3, arcB3, 8, 0, 0xffff00)
+            C.Add(arc3)
+
+            // Arc 4: Perfect semicircle test (green) - height = half distance
+            const arcA4 = {latitude: 40.765, longitude: -73.980}
+            const arcB4 = {latitude: 40.765, longitude: -73.990}
+            const arc4 = new CUBE.Data("arc-semicircle").Arc(arcA4, arcB4, 3, 0, 0x00ff66)
+            C.Add(arc4)
+
+            // === Text Tests ===
+
+            // Text at Times Square (static, no face-to-camera)
+            const text1 = new CUBE.Data("text-timessquare").Text(
+                {latitude: 40.758896, longitude: -73.985130},
+                "Times Square",
+                0.3,        // size
+                0xff6600,   // color
+                0.05        // thickness
+            )
+            C.Add(text1)
+
+            // Text at Empire State Building (static, no face-to-camera)
+            const text2 = new CUBE.Data("text-empire").Text(
+                {latitude: 40.748817, longitude: -73.985428},
+                "Empire State",
+                0.3,
+                0x00ffff,
+                0.05
+            )
+            C.Add(text2)
+
+            // Text at center with face-to-camera (SetLookAt)
+            const text3 = new CUBE.Data("text-center").Text(
+                Center,
+                "CUBE.gl",
+                0.5,
+                0xffffff,
+                0.1
+            )
+            text3.position.y = 2
+            C.Add(text3)
+            C.SetLookAt(text3) // always face camera
+
+            // Text with face-to-camera at Flatiron
+            const text4 = new CUBE.Data("text-flatiron").Text(
+                {latitude: 40.741895, longitude: -73.989308},
+                "Flatiron",
+                0.3,
+                0x00ff66,
+                0.05
+            )
+            text4.position.y = 1
+            C.Add(text4)
+            C.SetLookAt(text4) // always face camera
+
+            // === Reference markers (small spheres at arc endpoints) ===
+            const markerPositions = [
+                {latitude: 40.758896, longitude: -73.985130}, // Times Square
+                {latitude: 40.748817, longitude: -73.985428}, // Empire State
+                {latitude: 40.741895, longitude: -73.989308}, // Flatiron
+                {latitude: 40.730610, longitude: -73.935242}, // East Village
+            ]
+
+            markerPositions.forEach((pos, i) => {
+                const marker = new CUBE.Data("marker-" + i).Sphere(pos, 1, 0.08, 0, 0xffffff)
+                C.Add(marker)
+            })
+        }
+
+        function Update(){
+            requestAnimationFrame(Update)
+            C.Runtime()
+        }
+    </script>
+
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</html>

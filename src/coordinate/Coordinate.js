@@ -96,7 +96,7 @@ class GPSCoordinate {
  * @private
 */
 
-class WorldCoordinate {
+export class WorldCoordinate {
   constructor (x, y, z) {
     this.x = x
     this.y = y

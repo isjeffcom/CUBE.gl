@@ -37,18 +37,23 @@ export function DefaultConfig () {
       maxDistance: 800
 
     },
+    // Three.js r155+: physically correct lighting
+    // - AmbientLight intensity: multiplier (reasonable range: 0.5 - 5.0)
+    // - PointLight intensity: candela (cd), needs large values for distant lights
+    // - DirectionalLight intensity: lux (lx), reasonable range: 1 - 10
     lights: [
       {
-        name: 'enviorment',
+        name: 'environment',
         type: 'Ambient',
         color: 'fafafa',
-        opacity: 0.35
+        intensity: 1.0
       },
       {
         name: 'front-left',
         type: 'Point',
         color: 'fafafa',
-        opacity: 0.4,
+        intensity: 50000,
+        decay: 2,
         shadow: false,
         position: {
           x: 200,
@@ -60,7 +65,8 @@ export function DefaultConfig () {
         name: 'front-right',
         type: 'Point',
         color: 'fafafa',
-        opacity: 0.4,
+        intensity: 50000,
+        decay: 2,
         shadow: false,
         position: {
           x: 200,
@@ -72,8 +78,9 @@ export function DefaultConfig () {
         name: 'back-left',
         type: 'Point',
         color: 'fafafa',
-        opacity: 0.4,
-        shadow: true,
+        intensity: 50000,
+        decay: 2,
+        shadow: false,
         position: {
           x: -200,
           y: 90,
@@ -84,7 +91,8 @@ export function DefaultConfig () {
         name: 'back-right',
         type: 'Point',
         color: 'fafafa',
-        opacity: 0.4,
+        intensity: 50000,
+        decay: 2,
         shadow: false,
         position: {
           x: -200,

@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { Vector3 } from 'three'
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import { helvetiker } from './assets/font'
 
 export default class CUBE_Material {
@@ -20,7 +21,7 @@ export default class CUBE_Material {
   }
 
   TextFont (fontJson) {
-    const font = new THREE.FontLoader().parse(fontJson || helvetiker)
+    const font = new FontLoader().parse(fontJson || helvetiker)
     return font
   }
 

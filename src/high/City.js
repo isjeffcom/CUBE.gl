@@ -10,9 +10,9 @@
 // High level map api, loading 3d visualisation like using a map
 // Rely on third party APIs, it is possible not working stablely.
 
-// import * as THREE from 'three'
+import { GeoLayer } from '../layers/Geo'
 import { MakeBBox } from '../utils/geotools/GeoCalculator'
-import { toGeojson } from 'osmtogeojson'
+import osmtogeojson from 'osmtogeojson'
 
 const API_MAP = 'http://overpass-api.de/api/interpreter'
 const API_TERRAIN = 'https://portal.opentopography.org/API/globaldem'
@@ -54,10 +54,10 @@ export class City {
     const json = await (await fetch(queryURL)).json()
 
     // convert to geojson
-    const geojson = toGeojson(json)
+    const geojson = osmtogeojson(json)
 
     // return layer
-    return new CUBE.GeoLayer(name, geojson).Buildings(options, material || undefined)
+    return new GeoLayer(name, geojson).Buildings(options, material || undefined)
   }
 
   /**
@@ -75,10 +75,10 @@ export class City {
     const json = await (await fetch(queryURL)).json()
 
     // convert to geojson
-    const geojson = toGeojson(json)
+    const geojson = osmtogeojson(json)
 
     // return layer
-    return new CUBE.GeoLayer(name, geojson).Road(options || undefined, material || undefined)
+    return new GeoLayer(name, geojson).Road(options || undefined, material || undefined)
   }
 }
 
