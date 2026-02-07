@@ -28,7 +28,7 @@ export class AnimationEngine {
     }
 
     if (animation.type === 'dashline') {
-      this.allDash.push({ object: animation.object, distance: animation.distance, speedStep: animation.speedStep })
+      this.allDash.push({ object: animation.object, distance: animation.distance, speedStep: animation.speedStep, totalInstances: animation.totalInstances || 0, progress: 0 })
       this.aniGroup.Add(animation.object)
     }
 
@@ -86,18 +86,33 @@ export class AnimationEngine {
       for (let i = 0; i < this.allDash.length; i++) {
         const line = this.allDash[i]
 
-        const dash = parseInt(line.object.material.dashSize)
-        const length = parseInt(line.distance)
-
-        if (dash > length) {
-          // console.log("b")
-          line.object.material.dashSize = 0
-          line.object.material.opacity = 1
+        if (line.totalInstances > 0) {
+          // Fat line (Line2): animate by progressively drawing more segments
+          line.progress += line.speedStep
+          if (line.progress >= line.distance) {
+            line.progress = 0
+            line.object.geometry.instanceCount = 0
+            line.object.material.opacity = 1
+          } else {
+            const t = line.progress / line.distance
+            line.object.geometry.instanceCount = Math.ceil(t * line.totalInstances)
+            line.object.material.opacity = Math.max(0.2, 1 - t * t)
+          }
         } else {
-          // console.log("a")
-          line.object.material.dashSize += line.speedStep
-          line.object.material.opacity = line.object.material.opacity > 0 ? line.object.material.opacity - 0.002 : 0
+          // Thin line (THREE.Line): animate via dashSize
+          const dash = line.object.material.dashSize
+          const length = line.distance
+
+          if (dash >= length) {
+            line.object.material.dashSize = 0
+            line.object.material.opacity = 1
+          } else {
+            line.object.material.dashSize += line.speedStep
+            const progress = dash / length
+            line.object.material.opacity = Math.max(0, 1 - progress * progress)
+          }
         }
+
       }
     }
   }

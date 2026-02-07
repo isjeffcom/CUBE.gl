@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CUBE.gl Bar & Cylinder Test</title>
+        <link rel="icon" href="./favicon.png">
+    </head>
+
+    <body>
+        <div id="cont" style="position: absolute; width: 100%; height: 100%;"></div>
+    </body>
+
+    <script type="module">
+        import * as CUBE from '../src/Main.js'
+        import '../src/static/Global.js'
+
+        let C
+
+        const Center = {latitude: 40.760366, longitude: -73.983888} // NYC
+
+        const container = document.getElementById('cont')
+
+        Init()
+        Update()
+
+        async function Init(){
+            C = new CUBE.Space(container, {
+                background: "222222",
+                center: Center,
+                scale: 10,
+                camera: {
+                    position: {x: 5, y: 8, z: 5}
+                }
+            })
+
+            // === Bar Tests ===
+
+            // Row of bars with increasing values (red gradient)
+            for (let i = 1; i <= 5; i++) {
+                const bar = new CUBE.Data("bar-" + i).Bar(
+                    {latitude: 40.760366, longitude: -73.983888 + i * 0.001},
+                    i,           // value (height)
+                    0.3,         // size
+                    0,           // yOffset
+                    0xff0000 + i * 0x003300  // color gradient
+                )
+                C.Add(bar)
+            }
+
+            // === Cylinder Tests ===
+
+            // Row of cylinders with increasing values (blue gradient)
+            for (let i = 1; i <= 5; i++) {
+                const cyl = new CUBE.Data("cyl-" + i).Cylinder(
+                    {latitude: 40.759366, longitude: -73.983888 + i * 0.001},
+                    i,           // value (height)
+                    0.3,         // size
+                    0,           // yOffset
+                    0x0044ff + i * 0x003300  // color gradient
+                )
+                C.Add(cyl)
+            }
+
+            // === Sphere reference markers ===
+            const s1 = new CUBE.Data("sphere").Sphere(Center, 1, 0.15, 0, 0xffffff)
+            C.Add(s1)
+
+            // === Small scale test (like administrative map) ===
+            // These use the same Data class but at scale=10, segments should be fine
+            const tinyBar = new CUBE.Data("tiny-bar").Bar(
+                {latitude: 40.761366, longitude: -73.983888},
+                0.5, 0.1, 0, 0xffff00
+            )
+            C.Add(tinyBar)
+
+            const tinyCyl = new CUBE.Data("tiny-cyl").Cylinder(
+                {latitude: 40.761366, longitude: -73.982888},
+                0.5, 0.1, 0, 0x00ffff
+            )
+            C.Add(tinyCyl)
+        }
+
+        function Update(){
+            requestAnimationFrame(Update)
+            C.Runtime()
+        }
+    </script>
+
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</html>

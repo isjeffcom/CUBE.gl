@@ -49,7 +49,7 @@
             C.Add(buildings)
 
             const edRoad = await (await fetch('./assets/geo/project/highway.geojson')).json()
-            const road = new CUBE.GeoLayer("road", edRoad).Road({width: 2});
+            const road = new CUBE.GeoLayer("road", edRoad).RoadSp({width: 12, animation: true, animationEngine: C.GetAniEngine()});
             C.Add(road)
         }
 

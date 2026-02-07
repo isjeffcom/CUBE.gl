@@ -106,10 +106,15 @@ export class Animation {
      * @public
     */
 
-  DashLine (distance) {
+  /**
+   * @param {Number} distance total line length
+   * @param {Number} totalInstances total line segment count (for Line2 fat line animation)
+   */
+  DashLine (distance, totalInstances) {
     this.type = 'dashline'
     this.distance = distance
-    this.speedStep = distance / 400
+    this.speedStep = distance / 600
+    this.totalInstances = totalInstances || 0
     return this
   }
 

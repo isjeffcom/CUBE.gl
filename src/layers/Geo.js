@@ -325,80 +325,102 @@ export class GeoLayer {
 
     const widthScale = window.CUBE_GLOBAL.MAP_SCALE * (options.width || 12)
 
+    // Animation constraints
+    const ANI_MIN_LENGTH = 5       // minimum road length to animate
+    const ANI_MAX_LENGTH = 140     // maximum road length to animate
+    const ANI_MAX_COUNT = 90       // maximum number of animated roads
+    const ANI_MAX_SEGMENTS = 420   // maximum subdivisions per animated line
+
+    const allPoints = []
+
     for (let i = 0; i < features.length; i++) {
       const fel = features[i]
-
-      // Just in case properties value does not exist
       if (!fel.properties) return
 
       const info = fel.properties
-      // Only render when geometry is Polygon
       const tags = verify(info, 'highway')
 
       if (tags) {
-        // Render Roads
         if (fel.geometry.type === 'LineString' && tags !== 'pedestrian' && tags !== 'footway' && tags !== 'path') {
-          const road = addRoad(fel.geometry.coordinates, terrain)
-
+          const road = addRoad3(fel.geometry.coordinates, terrain)
           if (road) {
-            // Extract positions from BufferGeometry for Line2
-            const posAttr = road.geometry.getAttribute('position')
-            const positions = []
-            for (let p = 0; p < posAttr.count; p++) {
-              positions.push(posAttr.getX(p), posAttr.getY(p), posAttr.getZ(p))
-            }
-
-            // Create fat line using Line2 + LineMaterial (supports width)
-            const lineGeo = new LineGeometry()
-            lineGeo.setPositions(positions)
-
-            const matLine = mat || new LineMaterial({
-              color: options.color || 0x1B4686,
-              linewidth: widthScale * 0.0001,
-              worldUnits: true
-            })
-            if (matLine.resolution) matLine.resolution.set(window.innerWidth, window.innerHeight)
-
-            const line = new Line2(lineGeo, matLine)
-            line.computeLineDistances()
-            line.info = info
-
-            // Disable matrix auto update for performance
-            line.matrixAutoUpdate = false
-            line.updateMatrix()
-
-            // If Animation Activated
-            if (options.animation && options.animationEngine) {
-              // Use THREE.Line + LineDashedMaterial for dash animation
-              // (LineMaterial dashing repeats uniformly, not "grow from start")
-              const aniGeo = new THREE.BufferGeometry().setFromPoints(
-                Array.from({ length: posAttr.count }, (_, p) =>
-                  new THREE.Vector3(posAttr.getX(p), posAttr.getY(p), posAttr.getZ(p))
-                )
-              )
-              const aniLine = new THREE.Line(aniGeo, new THREE.LineDashedMaterial({
-                color: options.animationColor || 0x00FFFF,
-                transparent: true,
-                dashSize: 0,
-                gapSize: 99999
-              }))
-              aniLine.computeLineDistances()
-
-              const lineDistArr = aniLine.geometry.attributes.lineDistance.array
-              const lineLength = lineDistArr[lineDistArr.length - 1]
-
-              if (lineLength > 0.8) {
-                aniLine.material.gapSize = lineLength + 10
-                aniLine.matrixAutoUpdate = false
-                aniLine.updateMatrix()
-
-                const lineAni = new Animation('l', aniLine, 'dashline').DashLine(lineLength)
-                options.animationEngine.Register(lineAni)
-              }
-            }
-
-            this.layer_objects.Add(line)
+            allPoints.push({ points: road, info: info })
           }
+        }
+      }
+    }
+
+    // Build fat lines with spline interpolation (same as Road)
+    for (let ip = 0; ip < allPoints.length; ip++) {
+      const ipp = allPoints[ip].points
+      const info = allPoints[ip].info
+
+      // Spline interpolation for smooth curves
+      const divisions = Math.round(24 * ipp.length)
+      const spline = new THREE.CatmullRomCurve3(ipp, false, 'catmullrom', 0.001)
+      const point = new THREE.Vector3()
+
+      const positions = []
+      for (let s = 0, l = divisions; s < l; s++) {
+        const t = s / l
+        spline.getPoint(t, point)
+        positions.push(point.x, point.y, point.z)
+      }
+
+      const lineGeo = new LineGeometry()
+      lineGeo.setPositions(positions)
+      lineGeo.rotateZ(Math.PI)
+
+      const matLine = mat || new LineMaterial({
+        color: options.color || 0x1B4686,
+        linewidth: widthScale * 0.0001,
+        worldUnits: true
+      })
+      if (matLine.resolution) matLine.resolution.set(window.innerWidth, window.innerHeight)
+
+      const line = new Line2(lineGeo, matLine)
+      line.computeLineDistances()
+      line.info = info
+      line.matrixAutoUpdate = false
+      line.updateMatrix()
+
+      this.layer_objects.Add(line)
+
+      // Animation overlay
+      if (options.animation && options.animationEngine) {
+        const lineLength = spline.getLength()
+
+        // Only animate roads that are long enough, not too long, and within count limit
+        if (lineLength >= ANI_MIN_LENGTH && lineLength <= ANI_MAX_LENGTH && options.animationEngine.allDash.length < ANI_MAX_COUNT) {
+          // Cap subdivisions for animation line to control GPU cost
+          const aniDivisions = Math.min(positions.length, ANI_MAX_SEGMENTS)
+          const aniPositions = positions.length > aniDivisions * 3
+            ? samplePositions(positions, aniDivisions)
+            : positions
+
+          const aniLineGeo = new LineGeometry()
+          aniLineGeo.setPositions(aniPositions)
+          aniLineGeo.rotateZ(Math.PI)
+
+          const aniMat = new LineMaterial({
+            color: options.animationColor || 0x00FFFF,
+            linewidth: widthScale * 0.00012,
+            worldUnits: true,
+            transparent: true,
+            depthWrite: false
+          })
+          aniMat.resolution.set(window.innerWidth, window.innerHeight)
+
+          const aniLine = new Line2(aniLineGeo, aniMat)
+          aniLine.computeLineDistances()
+          aniLine.matrixAutoUpdate = false
+          aniLine.updateMatrix()
+
+          const totalInstances = aniLineGeo.getAttribute('instanceStart').count
+          aniLine.geometry.instanceCount = 0
+
+          const lineAni = new Animation('l', aniLine, 'dashline').DashLine(lineLength, totalInstances)
+          options.animationEngine.Register(lineAni)
         }
       }
     }
@@ -838,6 +860,19 @@ function verify (properties, key = 'building') {
   }
 
   return tags
+}
+
+// Downsample a flat positions array [x,y,z,x,y,z,...] to targetCount points
+function samplePositions (positions, targetCount) {
+  const srcCount = positions.length / 3
+  if (srcCount <= targetCount) return positions
+
+  const result = []
+  for (let i = 0; i < targetCount; i++) {
+    const srcIdx = Math.floor(i * (srcCount - 1) / (targetCount - 1)) * 3
+    result.push(positions[srcIdx], positions[srcIdx + 1], positions[srcIdx + 2])
+  }
+  return result
 }
 
 function addAnimatedLine (geometry, length, color = 0x00FFFF) {

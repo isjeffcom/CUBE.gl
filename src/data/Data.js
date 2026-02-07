@@ -21,7 +21,8 @@ export default class Data {
     this.name = name
     this._SCALE = window.CUBE_GLOBAL.MAP_SCALE
     this._HEIGHT_SCALE = 1 * this._SCALE
-    this._SEGMENTS = 16 * this._SCALE
+    // Ensure minimum segments for geometry (Three.js r133+ no longer clamps to 1 internally)
+    this._SEGMENTS = Math.max(3, Math.round(16 * this._SCALE))
   }
 
   /**
@@ -38,7 +39,7 @@ export default class Data {
   Sphere (coordinate, value = 1, size = 2, yOffset = 0, color = 0xff6600, mat) {
     const localCoor = new Coordinate('GPS', coordinate).ComputeWorldCoordinate()
 
-    const geometry = new THREE.SphereGeometry(size * 3, value * size, value * size)
+    const geometry = new THREE.SphereGeometry(size * 3, Math.max(16, value * size), Math.max(8, value * size))
     const material = mat || new THREE.MeshBasicMaterial({ color: color })
     const sphere = new THREE.Mesh(geometry, material)
 
@@ -101,7 +102,7 @@ export default class Data {
 
     const localCoor = new Coordinate('GPS', coordinate).ComputeWorldCoordinate()
 
-    const geometry = new THREE.CylinderGeometry(size, size, height, this._SEGMENTS) // top, bottom, height, segments
+    const geometry = new THREE.CylinderGeometry(size, size, height, Math.max(16, this._SEGMENTS)) // top, bottom, height, radialSegments
 
     const material = mat || new THREE.MeshPhongMaterial({ color: color })
     const cylinder = new THREE.Mesh(geometry, material)
