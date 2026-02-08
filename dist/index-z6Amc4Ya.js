@@ -24171,8 +24171,7 @@ class uA {
      * @public
     */
   Sphere(e = 1, t = 16737792) {
-    e = parseInt(e);
-    const n = new as(e / 2, e / 2 * 32, e / 2 * 32), i = new un().Basic({ color: t }), s = new rt(n, i);
+    const n = new as(e / 2, 32, 16), i = new un().Basic({ color: t }), s = new rt(n, i);
     return s.position.set(this.position.x, this.position.y, this.position.z), s;
   }
   /**
@@ -24182,7 +24181,7 @@ class uA {
      * @public
     */
   Cylinder(e = 1, t = 16737792) {
-    const n = new pr(e / 4, e / 4, e, e * 32), i = new un().Basic({ color: t }), s = new rt(n, i);
+    const n = new pr(e / 4, e / 4, e, 32), i = new un().Basic({ color: t }), s = new rt(n, i);
     return s.position.set(this.position.x, this.position.y, this.position.z), s;
   }
 }
@@ -25932,7 +25931,7 @@ const PT = [
   // LERC
   {
     cases: 34887,
-    importFn: () => import("./lerc-CZ1P4nzF.js").then(async (r) => (await r.zstd.init(), r)).then((r) => r.default),
+    importFn: () => import("./lerc-Epk_8mwu.js").then(async (r) => (await r.zstd.init(), r)).then((r) => r.default),
     decoderParameterFn: async (r) => ({
       ...await vc(r),
       LercParameters: await r.loadValue("LercParameters")
@@ -32321,4 +32320,4 @@ export {
   lE as a,
   Z1 as g
 };
-//# sourceMappingURL=index-BQpuXCuX.js.map
+//# sourceMappingURL=index-z6Amc4Ya.js.map

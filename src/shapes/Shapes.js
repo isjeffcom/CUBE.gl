@@ -40,8 +40,7 @@ export class Shapes {
     */
 
   Sphere (size = 1, color = 0xff6600) {
-    size = parseInt(size)
-    const geometry = new THREE.SphereGeometry(size / 2, (size / 2) * 32, (size / 2) * 32)
+    const geometry = new THREE.SphereGeometry(size / 2, 32, 16)
     const material = new CUBE_Material().Basic({ color: color })
     const sphere = new THREE.Mesh(geometry, material)
     sphere.position.set(this.position.x, this.position.y, this.position.z)
@@ -57,7 +56,7 @@ export class Shapes {
     */
 
   Cylinder (size = 1, color = 0xff6600) {
-    const geometry = new THREE.CylinderGeometry(size / 4, size / 4, size, size * 32)
+    const geometry = new THREE.CylinderGeometry(size / 4, size / 4, size, 32)
     const material = new CUBE_Material().Basic({ color: color })
     const cylinder = new THREE.Mesh(geometry, material)
     cylinder.position.set(this.position.x, this.position.y, this.position.z)
