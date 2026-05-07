@@ -19,6 +19,29 @@ import { Animation } from '../animation/Animation'
 import { Layer } from './Layer'
 import { CurvePath, LineCurve } from 'three'
 
+const VISUAL_STYLE_PACKS = {
+  cubeDefault: {
+    buildingVisual: { mode: 'advanced', minLevels: 4, windowColor: 0xb8dcff, windowGlow: 0.1, roughness: 0.62, metalness: 0.12 },
+    roadVisual: { mode: 'advanced', widthScale: 1, opacity: 0.96, highlightPrimary: true, highlightColor: 0x65d8ff }
+  },
+  nightNeon: {
+    buildingVisual: { mode: 'advanced', minLevels: 3, windowColor: 0x8ce8ff, windowGlow: 0.18, roughness: 0.5, metalness: 0.22 },
+    roadVisual: { mode: 'advanced', widthScale: 1.05, opacity: 0.9, highlightPrimary: true, highlightColor: 0x00e6ff, palette: { motorway: 0x00e6ff, trunk: 0x00b3ff, primary: 0x6ecbff } }
+  },
+  softDaylight: {
+    buildingVisual: { mode: 'basic', minLevels: 5, windowColor: 0xf6fbff, windowGlow: 0.05, roughness: 0.72, metalness: 0.08 },
+    roadVisual: { mode: 'basic', widthVariance: 0.5, colorJitter: true }
+  }
+}
+
+function resolveVisualOptions (options = {}, key) {
+  const styleName = options.style
+  const fromPack = styleName && VISUAL_STYLE_PACKS[styleName] && VISUAL_STYLE_PACKS[styleName][key]
+  const direct = options[key] || {}
+  if (!fromPack) return direct
+  return { ...fromPack, ...direct }
+}
+
 export class GeoLayer {
   /**
      * @param {String} name name of the layer
@@ -181,6 +204,7 @@ export class GeoLayer {
             if (options.collider) this.layer_colliders.Add(building.helper) // Invisiable collider
           } else {
             const mesh = new THREE.Mesh(building.geometry, this.mat_building)
+            addBuildingWindows(mesh, info, options)
             const n = verify(info, 'name')
             mesh.name = n || 'building'
             mesh.info = info
@@ -252,7 +276,7 @@ export class GeoLayer {
           const road = addRoad3(fel.geometry.coordinates, terrain)
           if (road) {
             // allPoints = allPoints.concat(road)
-            allPoints.push(road);
+            allPoints.push({ points: road, info: info });
           }
         }
       }
@@ -264,7 +288,8 @@ export class GeoLayer {
     // 2021.06.16 Major Updates: Use Line Geometry to support fat line for realistic highway generation
     
     for(let ip=0;ip<allPoints.length;ip++) {
-      const ipp = allPoints[ip]
+      const ipp = allPoints[ip].points
+      const roadInfo = allPoints[ip].info || {}
 
       const geometry = new LineGeometry()
     
@@ -283,11 +308,13 @@ export class GeoLayer {
       geometry.setPositions( positions )
       geometry.rotateZ(Math.PI)
 
-      const widthScale = window.CUBE_GLOBAL.MAP_SCALE * (options.width || 12)
+      const roadStyle = createRoadVisualStyle(options, roadInfo, ipp.length)
 
       const matLine = new LineMaterial( {
-        color: options.color || 0x4287f5,
-        linewidth: widthScale * .0001, // in world units
+        color: roadStyle.color,
+        opacity: roadStyle.opacity,
+        transparent: roadStyle.opacity < 1,
+        linewidth: roadStyle.widthScale * .0001, // in world units
         vertexColors: false,
         dashed: false,
         alphaToCoverage: true,
@@ -323,7 +350,6 @@ export class GeoLayer {
     // Terrain
     const terrain = options.terrain ? options.terrain.children[0].geometry : false
 
-    const widthScale = window.CUBE_GLOBAL.MAP_SCALE * (options.width || 12)
 
     // Animation constraints
     const ANI_MIN_LENGTH = 5       // minimum road length to animate
@@ -371,9 +397,12 @@ export class GeoLayer {
       lineGeo.setPositions(positions)
       lineGeo.rotateZ(Math.PI)
 
+      const roadStyle = createRoadVisualStyle(options, info, ipp.length)
       const matLine = mat || new LineMaterial({
-        color: options.color || 0x1B4686,
-        linewidth: widthScale * 0.0001,
+        color: roadStyle.color || 0x1B4686,
+        opacity: roadStyle.opacity,
+        transparent: roadStyle.opacity < 1,
+        linewidth: roadStyle.widthScale * 0.0001,
         worldUnits: true
       })
       if (matLine.resolution) matLine.resolution.set(window.innerWidth, window.innerHeight)
@@ -404,7 +433,7 @@ export class GeoLayer {
 
           const aniMat = new LineMaterial({
             color: options.animationColor || 0x00FFFF,
-            linewidth: widthScale * 0.00012,
+            linewidth: roadStyle.widthScale * 0.00012,
             worldUnits: true,
             transparent: true,
             depthWrite: false
@@ -536,6 +565,58 @@ export class GeoLayer {
 
     return this.layer.Layer()
   }
+}
+
+
+function createRoadVisualStyle (options = {}, info = {}, pointCount = 0) {
+  const style = resolveVisualOptions(options, 'roadVisual')
+  const levelMap = { motorway: 1.2, trunk: 1.1, primary: 1.0, secondary: 0.92, tertiary: 0.88, residential: 0.8, service: 0.72 }
+  const baseWidth = options.width || 12
+  const highway = verify(info, 'highway')
+
+  let widthFactor = 1
+  let color = options.color || 0x4287f5
+  let opacity = 1
+
+  if (style.enable) {
+    if (style.mode === 'advanced') {
+      const mapped = levelMap[highway] || 0.78
+      widthFactor = mapped * (style.widthScale || 1)
+      opacity = style.opacity || 0.96
+      if (style.palette && style.palette[highway]) color = style.palette[highway]
+      else if (style.highlightPrimary && (highway === 'motorway' || highway === 'primary')) color = style.highlightColor || 0x64c8ff
+    } else if (style.mode === 'basic') {
+      const variance = ((pointCount % 7) - 3) * 0.03
+      widthFactor = 1 + variance * (style.widthVariance || 0.8)
+      if (style.colorJitter) {
+        const c = new THREE.Color(color)
+        c.offsetHSL(0, 0, variance * 0.35)
+        color = c.getHex()
+      }
+    }
+  }
+
+  return { widthScale: window.CUBE_GLOBAL.MAP_SCALE * baseWidth * widthFactor, color, opacity }
+}
+
+function addBuildingWindows (mesh, info = {}, options = {}) {
+  const visual = resolveVisualOptions(options, 'buildingVisual')
+  if (!visual.enable || visual.mode !== 'advanced') return
+
+  const levels = parseFloat(info['building:levels'] || (info.tags && info.tags['building:levels']) || 1)
+  if (!Number.isFinite(levels) || levels < (visual.minLevels || 3)) return
+
+  const windowColor = visual.windowColor || 0xb8dcff
+  const emissiveIntensity = visual.windowGlow || 0.12
+  const wallColor = options.color ? options.color : 0x7884B2
+
+  mesh.material = new THREE.MeshStandardMaterial({
+    color: wallColor,
+    roughness: visual.roughness || 0.65,
+    metalness: visual.metalness || 0.15,
+    emissive: windowColor,
+    emissiveIntensity
+  })
 }
 
 function addBuilding (coordinates, collider = false, info = {}, height = 1, terrain) {

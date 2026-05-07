@@ -192,6 +192,39 @@ function Update(){
 
 
 
+
+### Building & Road Visual Options (Style Package)
+
+GeoLayer now supports opt-in style presets and per-feature overrides without changing default visuals.
+
+```javascript
+const buildings = new CUBE.GeoLayer('buildings', buildingGeojson).Buildings({
+  style: 'nightNeon',            // built-in style package preset
+  buildingVisual: {
+    enable: true,                // must be enabled explicitly
+    windowGlow: 0.22             // override preset values
+  }
+})
+
+const roads = new CUBE.GeoLayer('roads', roadGeojson).Road({
+  style: 'nightNeon',
+  width: 16,
+  roadVisual: {
+    enable: true,
+    palette: { secondary: 0x33b1ff, tertiary: 0x2378c3 }
+  }
+})
+```
+
+Built-in style presets:
+- `cubeDefault`
+- `nightNeon`
+- `softDaylight`
+
+If both `style` and `buildingVisual` / `roadVisual` are provided, explicit visual options override the preset.
+
+See runnable example: `playground/visual-style.html`.
+
 ## Use with Threejs
 
 The CUBE.gl is build upon three.js. You can access the built-in three.js by CUBE.Space.three or CUBE.Space.Three(). The current CUBE build is using three.js 0.119. You can also try to implement a different version.

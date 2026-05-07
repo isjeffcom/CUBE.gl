@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>CUBE.gl visual style options</title>
+  <script type="module" src="../src/index.js"></script>
+</head>
+
+<body>
+  <div id="cont" style="position: absolute; width: 100%; height: 100%;"></div>
+
+  <script>
+    Init()
+    Update()
+
+    const container = document.getElementById('cont')
+    let C
+
+    async function Init () {
+      C = new CUBE.Space(container, {
+        center: { latitude: 22.280278, longitude: 114.159444 },
+        scale: 10,
+        interaction: { enable: false },
+        camera: { position: { x: 4, y: 6, z: 4 } }
+      })
+
+      const [buildingRes, roadRes] = await Promise.all([
+        fetch('/assets/geo/project/building.geojson'),
+        fetch('/assets/geo/project/highway.geojson')
+      ])
+
+      const buildingsJson = await buildingRes.json()
+      const roadsJson = await roadRes.json()
+
+      const buildings = new CUBE.GeoLayer('buildings', buildingsJson).Buildings({
+        merge: false,
+        style: 'nightNeon',
+        buildingVisual: {
+          enable: true,
+          windowGlow: 0.22
+        }
+      })
+
+      const roads = new CUBE.GeoLayer('roads', roadsJson).Road({
+        width: 16,
+        style: 'nightNeon',
+        roadVisual: {
+          enable: true,
+          palette: {
+            secondary: 0x33b1ff,
+            tertiary: 0x2378c3
+          }
+        }
+      })
+
+      roads.position.y -= 0.1
+      C.Add(buildings)
+      C.Add(roads)
+    }
+
+    function Update () {
+      requestAnimationFrame(Update)
+      C.Runtime()
+    }
+  </script>
+</body>
+
+</html>
