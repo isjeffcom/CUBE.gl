@@ -221,6 +221,23 @@ export class Layer {
   Find(name: string): THREE.Object3D | undefined
 }
 
+export interface BuildingVisualOptions {
+  /** Enable visual enhancement (default keeps current style) */
+  enable?: boolean
+  /** basic: lightweight style variation, advanced: window/glow based facade */
+  mode?: 'basic' | 'advanced'
+  /** Advanced mode: minimum floors before applying window facade */
+  minLevels?: number
+  /** Advanced mode: emissive window color */
+  windowColor?: number
+  /** Advanced mode: emissive intensity */
+  windowGlow?: number
+  /** Advanced mode: material roughness */
+  roughness?: number
+  /** Advanced mode: material metalness */
+  metalness?: number
+}
+
 export interface BuildingOptions {
   /** Merge geometries for better performance (default: false) */
   merge?: boolean
@@ -230,6 +247,29 @@ export interface BuildingOptions {
   collider?: boolean
   /** Terrain object for altitude fitting */
   terrain?: THREE.Group
+  /** Optional road visual enhancement options */
+  roadVisual?: RoadVisualOptions
+}
+
+export interface RoadVisualOptions {
+  /** Enable visual enhancement (default keeps current style) */
+  enable?: boolean
+  /** basic: lightweight style variation, advanced: hierarchy-aware styling */
+  mode?: 'basic' | 'advanced'
+  /** Advanced mode: width multiplier */
+  widthScale?: number
+  /** Advanced mode: emphasize primary and motorway */
+  highlightPrimary?: boolean
+  /** Advanced mode: highlight color */
+  highlightColor?: number
+  /** Advanced mode: road class color palette */
+  palette?: Record<string, number>
+  /** Basic mode: lightness jitter */
+  colorJitter?: boolean
+  /** Basic mode: random-ish width variation amount */
+  widthVariance?: number
+  /** Advanced mode: opacity */
+  opacity?: number
 }
 
 export interface RoadOptions {
@@ -239,6 +279,8 @@ export interface RoadOptions {
   width?: number
   /** Terrain object for altitude fitting */
   terrain?: THREE.Group
+  /** Optional road visual enhancement options */
+  roadVisual?: RoadVisualOptions
 }
 
 export interface RoadSpOptions extends RoadOptions {
